@@ -1,0 +1,323 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+@import "tailwindcss";
+
+@theme {
+  /* Colors */
+  --color-aura-bg: #0A0A0F;
+  --color-aura-surface: #12121A;
+  --color-aura-card: #1A1A27;
+  --color-aura-border: #2A2A3F;
+  --color-aura-primary: #3B82F6;
+  --color-aura-primary-light: #60A5FA;
+  --color-aura-secondary: #7C3AED;
+  --color-aura-accent: #06B6D4;
+  --color-aura-success: #10B981;
+  --color-aura-warning: #F59E0B;
+  --color-aura-danger: #EF4444;
+  --color-aura-text: #F1F5F9;
+  --color-aura-muted: #94A3B8;
+
+  /* Fonts */
+  --font-sans: Inter, system-ui, sans-serif;
+  --font-display: Outfit, Inter, sans-serif;
+  --font-mono: JetBrains Mono, Fira Code, monospace;
+
+  /* Shadows */
+  --shadow-glow: 0 0 30px rgba(59, 130, 246, 0.3), 0 0 60px rgba(59, 130, 246, 0.1);
+  --shadow-glow-sm: 0 0 15px rgba(59, 130, 246, 0.2);
+  --shadow-card: 0 8px 32px rgba(0, 0, 0, 0.4), 0 1px 0 rgba(255, 255, 255, 0.05);
+
+  /* Animations */
+  --animate-float: float 6s ease-in-out infinite;
+  --animate-glow-pulse: glow-pulse 3s ease-in-out infinite;
+  --animate-slide-up: slide-up 0.5s ease-out;
+  --animate-shimmer: shimmer 2s linear infinite;
+
+  /* Keyframes */
+  @keyframes float {
+
+    0%,
+    100% {
+      transform: translateY(0px);
+    }
+
+    50% {
+      transform: translateY(-12px);
+    }
+  }
+
+  @keyframes glow-pulse {
+
+    0%,
+    100% {
+      box-shadow: 0 0 20px rgba(59, 130, 246, 0.2);
+    }
+
+    50% {
+      box-shadow: 0 0 40px rgba(59, 130, 246, 0.5), 0 0 80px rgba(59, 130, 246, 0.2);
+    }
+  }
+
+  @keyframes slide-up {
+    0% {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes shimmer {
+    0% {
+      background-position: -200% 0;
+    }
+
+    100% {
+      background-position: 200% 0;
+    }
+  }
+}
+
+:root {
+  --bg: #0A0A0F;
+  --surface: #12121A;
+  --card: #1A1A27;
+  --border: #2A2A3F;
+  --primary: #3B82F6;
+  --secondary: #7C3AED;
+  --accent: #06B6D4;
+  --text: #F1F5F9;
+  --muted: #94A3B8;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', system-ui, sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ── Vanta Canvas ── */
+#vanta-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* ── Glassmorphism Card ── */
+.glass-card {
+  background: rgba(26, 26, 39, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(59, 130, 246, 0.15);
+  border-radius: 16px;
+  transition: all 0.3s ease;
+}
+
+.glass-card:hover {
+  border-color: rgba(59, 130, 246, 0.35);
+  box-shadow: 0 0 30px rgba(59, 130, 246, 0.15), 0 8px 32px rgba(0, 0, 0, 0.4);
+  transform: translateY(-2px);
+}
+
+/* ── Glow Button ── */
+.btn-glow {
+  background: linear-gradient(135deg, #3B82F6, #7C3AED);
+  border: none;
+  border-radius: 12px;
+  color: white;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  padding: 0.75rem 1.75rem;
+  position: relative;
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+
+.btn-glow::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  background: linear-gradient(135deg, #3B82F6, #7C3AED, #06B6D4);
+  border-radius: 14px;
+  opacity: 0;
+  z-index: -1;
+  transition: opacity 0.3s ease;
+}
+
+.btn-glow:hover {
+  box-shadow: 0 0 30px rgba(59, 130, 246, 0.5), 0 0 60px rgba(59, 130, 246, 0.2);
+  transform: translateY(-2px);
+}
+
+.btn-glow:hover::before {
+  opacity: 1;
+}
+
+/* ── Secondary Button ── */
+.btn-outline {
+  background: transparent;
+  border: 1px solid rgba(59, 130, 246, 0.4);
+  border-radius: 12px;
+  color: var(--primary);
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+  padding: 0.75rem 1.75rem;
+  transition: all 0.3s ease;
+}
+
+.btn-outline:hover {
+  background: rgba(59, 130, 246, 0.1);
+  border-color: var(--primary);
+  box-shadow: 0 0 20px rgba(59, 130, 246, 0.2);
+}
+
+/* ── Text Gradient ── */
+.text-gradient {
+  background: linear-gradient(135deg, #60A5FA, #7C3AED, #06B6D4);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--surface);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(59, 130, 246, 0.3);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(59, 130, 246, 0.5);
+}
+
+/* ── Input Styles ── */
+.aura-input {
+  background: rgba(18, 18, 26, 0.8);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  border-radius: 10px;
+  color: var(--text);
+  font-family: 'Inter', sans-serif;
+  font-size: 0.95rem;
+  padding: 0.75rem 1rem;
+  transition: all 0.3s ease;
+  width: 100%;
+}
+
+.aura-input:focus {
+  border-color: rgba(59, 130, 246, 0.6);
+  box-shadow: 0 0 20px rgba(59, 130, 246, 0.15);
+  outline: none;
+}
+
+.aura-input::placeholder {
+  color: var(--muted);
+}
+
+/* ── Tag Badge ── */
+.tag-badge {
+  background: rgba(59, 130, 246, 0.1);
+  border: 1px solid rgba(59, 130, 246, 0.25);
+  border-radius: 20px;
+  color: var(--primary);
+  font-size: 0.75rem;
+  font-weight: 500;
+  padding: 0.2rem 0.7rem;
+  display: inline-block;
+}
+
+/* ── Page wrapper - sits above vanta ── */
+.page-content {
+  position: relative;
+  z-index: 1;
+}
+
+/* ── Mind Map node ── */
+.react-flow__node {
+  background: rgba(26, 26, 39, 0.9) !important;
+  border: 1px solid rgba(59, 130, 246, 0.3) !important;
+  border-radius: 12px !important;
+  color: var(--text) !important;
+  font-family: 'Inter', sans-serif !important;
+  font-size: 0.85rem !important;
+}
+
+.react-flow__edge-path {
+  stroke: rgba(59, 130, 246, 0.4) !important;
+  stroke-width: 2 !important;
+}
+
+.react-flow__background {
+  background-color: transparent !important;
+}
+
+/* ── Shimmer loading state ── */
+.shimmer {
+  background: linear-gradient(90deg,
+      rgba(26, 26, 39, 0) 0%,
+      rgba(59, 130, 246, 0.08) 50%,
+      rgba(26, 26, 39, 0) 100%);
+  background-size: 200% 100%;
+  animation: shimmer 2s linear infinite;
+}
+
+/* ── Progress bar ── */
+.progress-bar {
+  background: linear-gradient(90deg, #3B82F6, #7C3AED);
+  border-radius: 99px;
+  height: 4px;
+  transition: width 0.5s ease;
+}
+
+/* ── Floating label ── */
+.floating-label {
+  position: relative;
+}
+
+.floating-label label {
+  color: var(--muted);
+  font-size: 0.85rem;
+  left: 1rem;
+  pointer-events: none;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  transition: all 0.2s ease;
+}
+
+.floating-label input:focus~label,
+.floating-label input:not(:placeholder-shown)~label {
+  color: var(--primary);
+  font-size: 0.7rem;
+  top: 0.35rem;
+  transform: none;
+}

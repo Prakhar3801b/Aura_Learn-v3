@@ -1,51 +1,54 @@
-import whisper
 import tempfile
 import os
 import logging
-from pathlib import Path
-from typing import List, Dict, Any
+from typing import Dict, Any
+from groq import Groq
+from config import get_settings
 
 logger = logging.getLogger(__name__)
 
 
 class WhisperService:
-    """Transcribes audio/video using local OpenAI Whisper model."""
+    """Transcribes audio/video using Groq's Whisper API (cloud-based, lightweight)."""
 
-    def __init__(self, model_size: str = "base"):
-        self.model_size = model_size
-        self._model = None
-
-    def _get_model(self):
-        if self._model is None:
-            logger.info(f"Loading Whisper model: {self.model_size}")
-            self._model = whisper.load_model(self.model_size)
-        return self._model
+    def __init__(self, model_size: str = "whisper-large-v3"):
+        self.model_name = "whisper-large-v3"
+        settings = get_settings()
+        self._client = Groq(api_key=settings.groq_api_key)
 
     def transcribe_file(self, file_path: str) -> Dict[str, Any]:
         """
-        Transcribe an audio/video file and return transcript with timestamps.
-        Returns dict with: text, segments (each with start, end, text)
+        Transcribe an audio/video file via Groq Whisper API.
+        Returns dict with: text, language, segments
         """
         try:
-            model = self._get_model()
-            logger.info(f"Transcribing: {file_path}")
-            result = model.transcribe(file_path, word_timestamps=False, verbose=False)
+            logger.info(f"Transcribing via Groq Whisper: {file_path}")
+            with open(file_path, "rb") as audio_file:
+                transcription = self._client.audio.transcriptions.create(
+                    file=(os.path.basename(file_path), audio_file),
+                    model=self.model_name,
+                    response_format="verbose_json",
+                )
+
+            segments = []
+            for i, seg in enumerate(getattr(transcription, "segments", []) or []):
+                segments.append({
+                    "id": i,
+                    "start": seg.get("start", 0) if isinstance(seg, dict) else getattr(seg, "start", 0),
+                    "end": seg.get("end", 0) if isinstance(seg, dict) else getattr(seg, "end", 0),
+                    "text": (seg.get("text", "") if isinstance(seg, dict) else getattr(seg, "text", "")).strip(),
+                    "timestamp_label": self._format_timestamp(
+                        seg.get("start", 0) if isinstance(seg, dict) else getattr(seg, "start", 0)
+                    ),
+                })
+
             return {
-                "text": result["text"],
-                "language": result.get("language", "en"),
-                "segments": [
-                    {
-                        "id": seg["id"],
-                        "start": seg["start"],
-                        "end": seg["end"],
-                        "text": seg["text"].strip(),
-                        "timestamp_label": self._format_timestamp(seg["start"]),
-                    }
-                    for seg in result.get("segments", [])
-                ],
+                "text": transcription.text,
+                "language": getattr(transcription, "language", "en"),
+                "segments": segments,
             }
         except Exception as e:
-            logger.error(f"Whisper transcription failed: {e}")
+            logger.error(f"Groq Whisper transcription failed: {e}")
             return {"text": "", "language": "en", "segments": []}
 
     def transcribe_bytes(self, audio_bytes: bytes, suffix: str = ".mp4") -> Dict[str, Any]:

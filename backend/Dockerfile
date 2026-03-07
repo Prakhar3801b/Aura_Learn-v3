@@ -1,29 +1,20 @@
 # ── Aura Learn V3 Backend ──
-# FastAPI + Whisper + Tesseract OCR
+# FastAPI + Groq Whisper API + Tesseract OCR
 # Deploy on Render: Runtime = Docker
 
 FROM python:3.11-slim
 
-# System deps for building wheels + runtime
+# System deps for Tesseract OCR
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential \
-    gcc \
-    g++ \
-    curl \
-    git \
-    ffmpeg \
     tesseract-ocr \
     libtesseract-dev \
-    pkg-config \
+    build-essential \
+    gcc \
     && rm -rf /var/lib/apt/lists/*
-
-# Rust toolchain (required by tiktoken / openai-whisper)
-RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-ENV PATH="/root/.cargo/bin:${PATH}"
 
 WORKDIR /app
 
-# Upgrade pip first
+# Upgrade pip
 RUN pip install --upgrade pip setuptools wheel
 
 # Install Python deps

@@ -19,9 +19,6 @@ class Settings(BaseSettings):
     # CORS
     frontend_url: str = "http://localhost:3000"
 
-    # Whisper model size: tiny, base, small, medium, large
-    whisper_model: str = "base"
-
     # Upload limits
     max_upload_size_mb: int = 500
 

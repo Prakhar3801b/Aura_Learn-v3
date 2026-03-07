@@ -19,7 +19,7 @@ settings = get_settings()
 
 pdf_service = PDFService()
 ocr_service = OCRService()
-whisper_service = WhisperService(model_size=settings.whisper_model)
+whisper_service = WhisperService()
 ai_service = AIService()
 
 

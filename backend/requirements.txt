@@ -12,14 +12,10 @@ supabase==2.4.4
 langchain==0.2.6
 langchain-community==0.2.6
 langchain-groq==0.1.6
-llama-index==0.10.48
-llama-index-llms-groq==0.1.4
-llama-index-embeddings-huggingface==0.2.2
 groq==0.9.0
 
 # Whisper (local, free)
 openai-whisper==20231117
-ffmpeg-python==0.2.0
 
 # OCR
 pytesseract==0.3.10
@@ -29,13 +25,12 @@ Pillow==10.3.0
 pypdf2==3.0.1
 pdfplumber==0.11.1
 
-# Video Processing
-moviepy==1.0.3
+# Video/Audio
+ffmpeg-python==0.2.0
 
 # Data & ML
 numpy==1.26.4
 scikit-learn==1.5.0
-pandas==2.2.2
 
 # Config
 pydantic==2.7.4

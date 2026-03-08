@@ -53,3 +53,16 @@ async def root():
 @app.get("/health", tags=["Health"])
 async def health():
     return {"status": "ok"}
+
+
+@app.get("/debug/config", tags=["Health"])
+async def debug_config():
+    """Check which env vars are configured (values masked)."""
+    return {
+        "supabase_url": "SET" if settings.supabase_url else "MISSING",
+        "supabase_anon_key": "SET" if settings.supabase_anon_key else "MISSING",
+        "supabase_service_role_key": "SET" if settings.supabase_service_role_key else "MISSING",
+        "groq_api_key": "SET" if settings.groq_api_key else "MISSING",
+        "frontend_url": settings.frontend_url,
+        "cors_origins": allowed_origins,
+    }

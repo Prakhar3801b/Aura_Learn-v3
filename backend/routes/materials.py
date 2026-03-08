@@ -140,6 +140,10 @@ async def upload_material(
     user_id: str = Form(...),
 ):
     """Upload a study material (PDF, image, or video) and trigger AI processing."""
+    # Validate config before proceeding
+    if not settings.supabase_url or not settings.supabase_service_role_key:
+        raise HTTPException(500, "Backend is missing Supabase configuration. Check SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY env vars.")
+
     supabase = get_supabase()
 
     content_type = file.content_type or ""
@@ -160,15 +164,24 @@ async def upload_material(
         else:
             raise HTTPException(400, "Unsupported file type. Upload PDF, image, or video.")
 
-    file_bytes = await file.read()
+    try:
+        file_bytes = await file.read()
+    except Exception as e:
+        logger.error(f"Failed to read uploaded file: {e}")
+        raise HTTPException(400, f"Failed to read uploaded file: {e}")
+
     material_id = str(uuid.uuid4())
     storage_path = f"{user_id}/{material_id}/{file.filename}"
 
-    # Upload to Supabase Storage
-    supabase.storage.from_("study-materials").upload(
-        storage_path, file_bytes, {"content-type": content_type}
-    )
-    file_url = supabase.storage.from_("study-materials").get_public_url(storage_path)
+    try:
+        # Upload to Supabase Storage
+        supabase.storage.from_("study-materials").upload(
+            storage_path, file_bytes, {"content-type": content_type}
+        )
+        file_url = supabase.storage.from_("study-materials").get_public_url(storage_path)
+    except Exception as e:
+        logger.error(f"Supabase storage upload failed: {e}")
+        raise HTTPException(500, f"Failed to upload file to storage: {e}")
 
     # Insert metadata row
     row = {
@@ -180,7 +193,11 @@ async def upload_material(
         "status": ProcessingStatus.pending.value,
         "created_at": datetime.utcnow().isoformat(),
     }
-    supabase.table("study_materials").insert(row).execute()
+    try:
+        supabase.table("study_materials").insert(row).execute()
+    except Exception as e:
+        logger.error(f"Failed to insert material row: {e}")
+        raise HTTPException(500, f"Failed to save material metadata: {e}")
 
     # Kick off background processing
     background_tasks.add_task(

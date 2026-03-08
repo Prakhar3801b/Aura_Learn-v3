@@ -16,7 +16,10 @@ async function fetchAPI<T>(path: string, options: RequestInit = {}): Promise<T> 
 
 export async function uploadMaterial(formData: FormData) {
     const res = await fetch(`${API_BASE}/materials/upload`, { method: 'POST', body: formData });
-    if (!res.ok) throw new Error('Upload failed');
+    if (!res.ok) {
+        const err = await res.json().catch(() => ({ detail: 'Upload failed' }));
+        throw new Error(err.detail || `Upload failed (HTTP ${res.status})`);
+    }
     return res.json();
 }
 

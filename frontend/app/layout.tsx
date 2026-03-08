@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import VantaBackground from "@/components/VantaBackground";
 import Navbar from "@/components/Navbar";
+import ErrorBoundary from "@/components/ErrorBoundary";
 
 export const metadata: Metadata = {
   title: "Aura Learn — AI-Powered Study Engine",
@@ -22,9 +23,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <VantaBackground />
         <Navbar />
         <main className="page-content">
-          {children}
+          <ErrorBoundary>
+            {children}
+          </ErrorBoundary>
         </main>
       </body>
     </html>
   );
 }
+

@@ -16,9 +16,19 @@ app = FastAPI(
     redoc_url="/redoc",
 )
 
+# Build CORS origins list — always include localhost + Vercel production
+_origins = {
+    "http://localhost:3000",
+    "https://aura-learn-v3.vercel.app",
+}
+if settings.frontend_url:
+    _origins.add(settings.frontend_url.rstrip("/"))
+allowed_origins = list(_origins)
+logger.info(f"CORS allowed origins: {allowed_origins}")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[settings.frontend_url, "http://localhost:3000"],
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

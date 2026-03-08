@@ -1,4 +1,4 @@
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+export const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
 async function fetchAPI<T>(path: string, options: RequestInit = {}): Promise<T> {
     const res = await fetch(`${API_BASE}${path}`, {
@@ -13,6 +13,15 @@ async function fetchAPI<T>(path: string, options: RequestInit = {}): Promise<T> 
 }
 
 // ── Materials ──────────────────────────────────
+export interface Material {
+    id: string;
+    title: string;
+    description?: string;
+    status: 'pending' | 'processing' | 'completed' | 'failed';
+    user_id: string;
+    file_path?: string;
+    created_at: string;
+}
 
 export async function uploadMaterial(formData: FormData) {
     const res = await fetch(`${API_BASE}/materials/upload`, { method: 'POST', body: formData });
@@ -23,12 +32,12 @@ export async function uploadMaterial(formData: FormData) {
     return res.json();
 }
 
-export async function getMaterial(id: string) {
-    return fetchAPI(`/materials/${id}`);
+export async function getMaterial(id: string): Promise<Material> {
+    return fetchAPI<Material>(`/materials/${id}`);
 }
 
-export async function getUserMaterials(userId: string) {
-    return fetchAPI<any[]>(`/materials/user/${userId}`);
+export async function getUserMaterials(userId: string): Promise<Material[]> {
+    return fetchAPI<Material[]>(`/materials/user/${userId}`);
 }
 
 // ── AI Results ────────────────────────────────

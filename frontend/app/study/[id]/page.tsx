@@ -1,12 +1,12 @@
 'use client';
 
-import { useEffect, useState, use } from 'react';
+import { useEffect, useState, use, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import Flashcards from '@/components/Flashcards';
 import ExamPoints from '@/components/ExamPoints';
-import { getFlashcards, getExamPoints, getMindMap, getMaterial, updateFlashcardConfidence, startSession, recordEvent } from '@/lib/api';
+import { getFlashcards, getExamPoints, getMindMap, getMaterial, updateFlashcardConfidence, startSession, recordEvent, Material, API_BASE } from '@/lib/api';
 import { supabase } from '@/lib/supabase';
 
 const MindMap = dynamic(() => import('@/components/MindMap'), { ssr: false });
@@ -15,7 +15,7 @@ type Panel = 'mindmap' | 'flashcards' | 'exampoints';
 
 export default function StudyPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = use(params);
-    const [material, setMaterial] = useState<any>(null);
+    const [material, setMaterial] = useState<Material | null>(null);
     const [flashcards, setFlashcards] = useState<any[]>([]);
     const [examPoints, setExamPoints] = useState<any[]>([]);
     const [mindMap, setMindMap] = useState<any>({ nodes: [], edges: [] });
@@ -23,33 +23,62 @@ export default function StudyPage({ params }: { params: Promise<{ id: string }> 
     const [selectedNode, setSelectedNode] = useState<any>(null);
     const [sessionId, setSessionId] = useState<string>('');
     const [loading, setLoading] = useState(true);
+    const [status, setStatus] = useState<string>('pending'); // pending, processing, completed, failed
+    const pollInterval = useRef<NodeJS.Timeout | null>(null);
+
+    const loadContent = async () => {
+        try {
+            const [fcs, eps, mm] = await Promise.all([
+                getFlashcards(id),
+                getExamPoints(id),
+                getMindMap(id),
+            ]);
+            setFlashcards(fcs);
+            setExamPoints(eps);
+            setMindMap(mm);
+
+            const { data: { user } } = await supabase.auth.getUser();
+            if (user && !sessionId) {
+                const session = await startSession(user.id, id);
+                setSessionId(session.session_id);
+            }
+        } catch (e) {
+            console.error('Error loading content:', e);
+        }
+    };
 
     useEffect(() => {
-        async function load() {
+        async function checkStatus() {
             try {
-                const [mat, fcs, eps, mm] = await Promise.all([
-                    getMaterial(id),
-                    getFlashcards(id),
-                    getExamPoints(id),
-                    getMindMap(id),
-                ]);
+                const mat = await getMaterial(id);
                 setMaterial(mat);
-                setFlashcards(fcs);
-                setExamPoints(eps);
-                setMindMap(mm);
+                setStatus(mat.status);
 
-                const { data: { user } } = await supabase.auth.getUser();
-                if (user) {
-                    const session = await startSession(user.id, id);
-                    setSessionId(session.session_id);
+                if (mat.status === 'completed') {
+                    if (pollInterval.current) clearInterval(pollInterval.current);
+                    await loadContent();
+                    setLoading(false);
+                } else if (mat.status === 'failed') {
+                    if (pollInterval.current) clearInterval(pollInterval.current);
+                    setLoading(false);
+                } else {
+                    // Start polling if not already started
+                    if (!pollInterval.current) {
+                        pollInterval.current = setInterval(checkStatus, 3000);
+                    }
                 }
             } catch (e) {
-                console.error(e);
-            } finally {
+                console.error('Status check failed:', e);
                 setLoading(false);
+                if (pollInterval.current) clearInterval(pollInterval.current);
             }
         }
-        load();
+
+        checkStatus();
+
+        return () => {
+            if (pollInterval.current) clearInterval(pollInterval.current);
+        };
     }, [id]);
 
     const handleNodeClick = (node: any) => {
@@ -72,11 +101,53 @@ export default function StudyPage({ params }: { params: Promise<{ id: string }> 
         { id: 'exampoints', label: `Exam Points (${examPoints.length})`, icon: '🎯' },
     ];
 
-    if (loading) return (
+    const handleReprocess = async () => {
+        try {
+            setLoading(true);
+            await fetch(`${API_BASE}/ai/process/${id}`, { method: 'POST' });
+            // Refresh after a delay
+            setTimeout(() => window.location.reload(), 2000);
+        } catch (e) {
+            console.error('Reprocess failed:', e);
+            setLoading(false);
+        }
+    };
+
+    if (loading || status === 'pending' || status === 'processing') return (
+        <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', paddingTop: '80px', background: '#09090b' }}>
+            <div style={{ textAlign: 'center', maxWidth: '400px', padding: '2rem' }}>
+                <motion.div
+                    animate={{ rotate: 360 }}
+                    transition={{ repeat: Infinity, duration: 2, ease: "linear" }}
+                    style={{ width: '60px', height: '60px', borderRadius: '50%', border: '3px solid rgba(59,130,246,0.1)', borderTop: '3px solid #3B82F6', margin: '0 auto 2rem' }}
+                />
+                <h2 style={{ fontFamily: 'Outfit', color: '#F8FAFC', fontSize: '1.5rem', fontWeight: 700, marginBottom: '1rem' }}>
+                    {status === 'processing' ? 'AI is analyzing your notes...' : 'Preparing study session...'}
+                </h2>
+                <p style={{ color: '#94A3B8', fontSize: '0.9rem', lineHeight: 1.6 }}>
+                    Our AI is currently extracting key concepts, generating flashcards, and building your interactive mind map. This usually takes 20-40 seconds.
+                </p>
+                <div style={{ marginTop: '2rem', display: 'flex', gap: '0.5rem', justifyContent: 'center' }}>
+                    {[0, 1, 2].map((i) => (
+                        <motion.div
+                            key={i}
+                            animate={{ opacity: [0.3, 1, 0.3] }}
+                            transition={{ repeat: Infinity, duration: 1.5, delay: i * 0.2 }}
+                            style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#3B82F6' }}
+                        />
+                    ))}
+                </div>
+            </div>
+        </div>
+    );
+
+    if (status === 'failed') return (
         <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', paddingTop: '80px' }}>
-            <div style={{ textAlign: 'center' }}>
-                <div style={{ width: '48px', height: '48px', borderRadius: '50%', border: '3px solid rgba(59,130,246,0.2)', borderTop: '3px solid #3B82F6', animation: 'spin 1s linear infinite', margin: '0 auto 1rem' }} />
-                <p style={{ color: '#94A3B8' }}>Loading study material...</p>
+            <div style={{ textAlign: 'center', maxWidth: '400px' }}>
+                <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>⚠️</div>
+                <h2 style={{ fontFamily: 'Outfit', color: '#F8FAFC', marginBottom: '1rem' }}>Processing Failed</h2>
+                <p style={{ color: '#94A3B8', marginBottom: '2rem' }}>Something went wrong while analyzing your material. Please try uploading it again.</p>
+                <Link href="/upload" className="btn-glow" style={{ padding: '0.8rem 1.5rem', textDecoration: 'none' }}>Go back to Upload</Link>
             </div>
         </div>
     );
@@ -95,6 +166,12 @@ export default function StudyPage({ params }: { params: Promise<{ id: string }> 
                         </p>
                     </div>
                     <div style={{ display: 'flex', gap: '0.75rem' }}>
+                        <button
+                            onClick={handleReprocess}
+                            style={{ padding: '0.6rem 1rem', borderRadius: '10px', background: 'rgba(59,130,246,0.1)', border: '1px solid rgba(59,130,246,0.2)', color: '#60A5FA', fontSize: '0.85rem', cursor: 'pointer' }}
+                        >
+                            🔄 Reprocess
+                        </button>
                         <Link
                             href={`/focus/${id}`}
                             style={{
@@ -169,11 +246,19 @@ export default function StudyPage({ params }: { params: Promise<{ id: string }> 
                     >
                         {activePanel === 'mindmap' && (
                             <div style={{ height: '100%' }}>
-                                <MindMap
-                                    nodes={mindMap.nodes}
-                                    edges={mindMap.edges}
-                                    onNodeClick={handleNodeClick}
-                                />
+                                {mindMap.nodes && mindMap.nodes.length > 0 ? (
+                                    <MindMap
+                                        nodes={mindMap.nodes}
+                                        edges={mindMap.edges}
+                                        onNodeClick={handleNodeClick}
+                                    />
+                                ) : (
+                                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#94A3B8' }}>
+                                        <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🧠</div>
+                                        <p>No mind map nodes generated yet.</p>
+                                        <button onClick={handleReprocess} style={{ marginTop: '1rem', color: '#3B82F6', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline' }}>Try re-processing →</button>
+                                    </div>
+                                )}
                                 {/* Node Detail Drawer */}
                                 <AnimatePresence>
                                     {selectedNode && (

@@ -84,9 +84,11 @@ export default function MindMap({ nodes: rawNodes, edges: rawEdges, onNodeClick 
     const [edges, setEdges, onEdgesChange] = useEdgesState(buildFlowEdges(rawEdges));
 
     useEffect(() => {
-        setNodes(buildFlowNodes(rawNodes));
-        setEdges(buildFlowEdges(rawEdges));
-    }, [rawNodes, rawEdges]);
+        if (rawNodes && rawNodes.length > 0) {
+            setNodes(buildFlowNodes(rawNodes));
+            setEdges(buildFlowEdges(rawEdges));
+        }
+    }, [rawNodes, rawEdges, setNodes, setEdges]);
 
     const onConnect = useCallback(
         (params: any) => setEdges((eds) => addEdge(params, eds)),

@@ -91,13 +91,25 @@ class AIService:
             raise
 
     def _safe_json_parse(self, text: str) -> Any:
-        """Extract and parse JSON from model response."""
-        # Remove markdown code blocks if present
+        """Extract and parse JSON from model response, handling potential text artifacts."""
         text = text.strip()
-        if text.startswith("```"):
-            lines = text.split("\n")
-            text = "\n".join(lines[1:-1])
-        return json.loads(text)
+        
+        # Try to find JSON within code blocks first
+        if "```json" in text:
+            text = text.split("```json")[1].split("```")[0].strip()
+        elif "```" in text:
+            text = text.split("```")[1].split("```")[0].strip()
+        
+        # If still failing, try to find the first '[' or '{' and last ']' or '}'
+        try:
+            return json.loads(text)
+        except json.JSONDecodeError:
+            # Fallback for models that add conversational text around JSON
+            start_idx = min(text.find('['), text.find('{')) if '[' in text and '{' in text else (text.find('[') if '[' in text else text.find('{'))
+            end_idx = max(text.rfind(']'), text.rfind('}')) + 1
+            if start_idx != -1 and end_idx != 0:
+                text = text[start_idx:end_idx]
+            return json.loads(text)
 
     def generate_flashcards(self, text: str, material_id: str, count: int = 15) -> List[FlashCard]:
         """Generate predictive flashcards from study text."""

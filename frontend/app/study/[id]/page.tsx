@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, use } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
@@ -13,8 +13,8 @@ const MindMap = dynamic(() => import('@/components/MindMap'), { ssr: false });
 
 type Panel = 'mindmap' | 'flashcards' | 'exampoints';
 
-export default function StudyPage({ params }: { params: { id: string } }) {
-    const { id } = params;
+export default function StudyPage({ params }: { params: Promise<{ id: string }> }) {
+    const { id } = use(params);
     const [material, setMaterial] = useState<any>(null);
     const [flashcards, setFlashcards] = useState<any[]>([]);
     const [examPoints, setExamPoints] = useState<any[]>([]);

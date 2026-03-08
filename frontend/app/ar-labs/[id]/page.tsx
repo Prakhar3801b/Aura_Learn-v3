@@ -1,24 +1,25 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, use } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { getARLab } from '@/lib/api';
 
-export default function ARLabPage({ params }: { params: { id: string } }) {
+export default function ARLabPage({ params }: { params: Promise<{ id: string }> }) {
+    const { id } = use(params);
     const [lab, setLab] = useState<any>(null);
     const [arStarted, setArStarted] = useState(false);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        getARLab(params.id).then(setLab).finally(() => setLoading(false));
+        getARLab(id).then(setLab).finally(() => setLoading(false));
         // Load A-Frame
         const script = document.createElement('script');
         script.src = 'https://aframe.io/releases/1.5.0/aframe.min.js';
         script.async = true;
         document.head.appendChild(script);
         return () => { document.head.removeChild(script); };
-    }, [params.id]);
+    }, [id]);
 
     const buildAFrameScene = (lab: any): string => {
         if (!lab?.scene?.entities) return '';

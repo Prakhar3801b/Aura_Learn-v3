@@ -1,12 +1,12 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, use } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getFlashcards, getExamPoints } from '@/lib/api';
 import Link from 'next/link';
 
-export default function FocusPage({ params }: { params: { id: string } }) {
-    const { id } = params;
+export default function FocusPage({ params }: { params: Promise<{ id: string }> }) {
+    const { id } = use(params);
     const [flashcards, setFlashcards] = useState<any[]>([]);
     const [examPoints, setExamPoints] = useState<any[]>([]);
     const [mode, setMode] = useState<'flashcards' | 'exampoints'>('flashcards');

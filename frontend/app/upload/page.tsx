@@ -6,6 +6,7 @@ import { useDropzone, Accept } from 'react-dropzone';
 import { supabase } from '@/lib/supabase';
 import { uploadMaterial } from '@/lib/api';
 import { useRouter } from 'next/navigation';
+import Chatbox from '@/components/Chatbox';
 
 const ACCEPTED_TYPES: Accept = {
     'application/pdf': ['.pdf'],
@@ -205,6 +206,11 @@ export default function UploadPage() {
                     </p>
                 </div>
             </div>
+
+            <Chatbox
+                initialMessage="I'm Aura, your AI study assistant. Upload a document, image, or video, and I'll help you master the content!"
+                placeholder="Ask how Aura Learn works..."
+            />
         </div>
     );
 }

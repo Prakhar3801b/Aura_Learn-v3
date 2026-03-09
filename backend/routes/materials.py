@@ -92,7 +92,7 @@ async def process_material_background(
         # Store mind map nodes
         node_rows = [
             {
-                "id": node.id,
+                "id": f"{material_id}_{node.id}",
                 "material_id": material_id,
                 "label": node.label,
                 "topic": node.topic,
@@ -110,10 +110,10 @@ async def process_material_background(
         # Store mind map edges
         edge_rows = [
             {
-                "id": edge.id,
+                "id": f"{material_id}_{edge.id}",
                 "material_id": material_id,
-                "source": edge.source,
-                "target": edge.target,
+                "source": f"{material_id}_{edge.source}",
+                "target": f"{material_id}_{edge.target}",
                 "label": edge.label,
             }
             for edge in ai_result.mind_map.edges

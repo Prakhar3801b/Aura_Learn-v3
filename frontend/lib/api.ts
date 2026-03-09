@@ -58,6 +58,13 @@ export async function getMindMap(materialId: string) {
     return fetchAPI<any>(`/ai/mindmap/${materialId}`);
 }
 
+export async function chatWithMaterial(materialId: string, question: string) {
+    return fetchAPI<any>(`/ai/chat/${materialId}`, {
+        method: 'POST',
+        body: JSON.stringify({ question }),
+    });
+}
+
 // ── Analytics ──────────────────────────────────
 
 export async function startSession(userId: string, materialId: string) {

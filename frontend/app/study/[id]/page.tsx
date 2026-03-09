@@ -8,6 +8,7 @@ import Flashcards from '@/components/Flashcards';
 import ExamPoints from '@/components/ExamPoints';
 import { getFlashcards, getExamPoints, getMindMap, getMaterial, updateFlashcardConfidence, startSession, recordEvent, Material, API_BASE } from '@/lib/api';
 import { supabase } from '@/lib/supabase';
+import Chatbox from '@/components/Chatbox';
 
 const MindMap = dynamic(() => import('@/components/MindMap'), { ssr: false });
 
@@ -299,6 +300,11 @@ export default function StudyPage({ params }: { params: Promise<{ id: string }> 
                     </motion.div>
                 </AnimatePresence>
             </div>
+
+            <Chatbox
+                materialId={id}
+                initialMessage={`Hi! I've analyzed "${material?.title || 'this material'}". You can ask me to explain specific concepts or find information in the text.`}
+            />
         </div>
     );
 }

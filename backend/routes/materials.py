@@ -10,6 +10,7 @@ from services.pdf_service import PDFService
 from services.ocr_service import OCRService
 from services.whisper_service import WhisperService
 from services.ai_service import AIService
+from services.embedding_service import EmbeddingService
 from models.material import MaterialUploadResponse, ProcessingStatus, FileType
 from datetime import datetime
 
@@ -21,6 +22,7 @@ pdf_service = PDFService()
 ocr_service = OCRService()
 whisper_service = WhisperService()
 ai_service = AIService()
+embedding_service = EmbeddingService()
 
 
 def get_supabase():
@@ -118,6 +120,28 @@ async def process_material_background(
         ]
         if edge_rows:
             supabase.table("mind_map_edges").insert(edge_rows).execute()
+
+        # 5. Chunk and Embed for RAG
+        chunks = pdf_service.chunk_text(text)
+        if chunks:
+            chunk_texts = [c["text"] for c in chunks]
+            embeddings = embedding_service.embed_texts(chunk_texts)
+            
+            chunk_rows = [
+                {
+                    "id": str(uuid.uuid4()),
+                    "material_id": material_id,
+                    "chunk_index": i,
+                    "text": c["text"],
+                    "embedding": embeddings[i],
+                    "char_start": c["char_start"],
+                    "char_end": c["char_end"],
+                }
+                for i, c in enumerate(chunks)
+            ]
+            if chunk_rows:
+                # Use standard insert for chunks
+                supabase.table("material_chunks").insert(chunk_rows).execute()
 
         supabase.table("study_materials").update(
             {"status": ProcessingStatus.completed.value}

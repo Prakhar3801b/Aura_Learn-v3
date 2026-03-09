@@ -13,7 +13,7 @@ const features = [
   {
     icon: '⚡',
     title: 'Predictive Flashcards',
-    desc: 'Groq-powered Llama 3 generates exam-targeted Q&A with spaced-repetition confidence tracking.',
+    desc: 'Groq-powered Llama 3.3 generates exam-targeted Q&A with spaced-repetition confidence tracking.',
     color: '#7C3AED',
   },
   {
@@ -82,7 +82,7 @@ export default function LandingPage() {
                 textTransform: 'uppercase',
               }}
             >
-              ✦ Powered by Groq · Llama 3 · WebXR
+              ✦ Powered by Groq · Llama 3.3 · WebXR
             </span>
           </div>
 

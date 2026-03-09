@@ -11,6 +11,9 @@ class Settings(BaseSettings):
     # Groq
     groq_api_key: str = ""
 
+    # Voyage AI (for embeddings)
+    voyage_api_key: str = ""
+
     # App
     secret_key: str = "change-this-in-production-supersecretkey"
     algorithm: str = "HS256"

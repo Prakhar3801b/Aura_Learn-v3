@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS material_chunks (
   material_id UUID REFERENCES study_materials(id) ON DELETE CASCADE,
   chunk_index INT NOT NULL,
   text TEXT NOT NULL,
-  embedding vector(1536),
+  embedding vector(1024),
   char_start INT,
   char_end INT,
   created_at TIMESTAMPTZ DEFAULT NOW()

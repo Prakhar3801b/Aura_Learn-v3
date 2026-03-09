@@ -2,10 +2,16 @@ import logging
 from fastapi import APIRouter, HTTPException
 from supabase import create_client
 from config import get_settings
+from services.rag_service import RAGService
+from pydantic import BaseModel
 
 router = APIRouter(prefix="/ai", tags=["AI"])
 logger = logging.getLogger(__name__)
 settings = get_settings()
+rag_service = RAGService()
+
+class ChatRequest(BaseModel):
+    question: str
 
 
 def get_supabase():
@@ -79,3 +85,14 @@ async def trigger_reprocess(material_id: str):
     if not mat.data:
         raise HTTPException(404, "Material not found")
     return {"status": "reprocessing queued", "material_id": material_id}
+
+
+@router.post("/chat/{material_id}")
+async def chat_with_material(material_id: str, request: ChatRequest):
+    """Chat with the study material using RAG."""
+    try:
+        result = await rag_service.answer_question(material_id, request.question)
+        return result
+    except Exception as e:
+        logger.error(f"Chat failed: {e}")
+        raise HTTPException(500, str(e))

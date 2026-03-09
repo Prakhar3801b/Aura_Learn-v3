@@ -10,7 +10,7 @@
 | **Background** | Vanta.js Globe (blue/black, all pages) |
 | **Backend** | FastAPI (Python 3.11), Uvicorn |
 | **Database** | Supabase (PostgreSQL + pgvector) |
-| **AI** | Groq API (Llama 3 70B), OpenAI Whisper (local), Tesseract OCR |
+| **AI** | Groq API (Llama 3.3 70B), OpenAI Whisper (local), Tesseract OCR |
 | **AR** | A-Frame 1.5, WebXR Device API |
 
 ## AR Labs (7 Total)
@@ -137,7 +137,7 @@ Aura_learn V3/
 │   │   ├── analytics.py           # Session events + anomaly detection
 │   │   └── xr.py                  # 7 AR lab definitions
 │   ├── services/
-│   │   ├── ai_service.py          # Groq / Llama 3 pipeline
+│   │   ├── ai_service.py          # Groq / Llama 3.3 pipeline
 │   │   ├── whisper_service.py     # Local Whisper transcription + timestamps
 │   │   ├── ocr_service.py         # Tesseract OCR
 │   │   ├── pdf_service.py         # PDF extraction + chunking
@@ -163,7 +163,7 @@ Aura_learn V3/
 1. **PDF** → `pdfplumber` extracts text → chunked for pgvector  
 2. **Image** → Tesseract OCR extracts handwritten text  
 3. **Video** → local Whisper transcribes with timestamps  
-4. All → Groq Llama 3 generates flashcards, exam points, mind map  
+4. All → Groq Llama 3.3 generates flashcards, exam points, mind map  
 5. Mind map nodes auto-linked to video timestamps when available
 
 ### Analytics & Anomaly Detection

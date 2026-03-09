@@ -74,7 +74,7 @@ class AIService:
 
     def __init__(self):
         self.client = Groq(api_key=settings.groq_api_key)
-        self.model = "llama3-70b-8192"
+        self.model = "llama-3.3-70b-versatile"
 
     def _chat(self, prompt: str, max_tokens: int = 4096) -> str:
         """Call Groq chat completion."""

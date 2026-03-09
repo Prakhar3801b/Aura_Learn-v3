@@ -1,5 +1,5 @@
 # ── Aura Learn V3 Backend ──
-# FastAPI + Groq Whisper API + Tesseract OCR
+# FastAPI + Groq Whisper API + Groq Llama 3.3 + Tesseract OCR
 # Deploy on Render: Runtime = Docker
 
 FROM python:3.11-slim

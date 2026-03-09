@@ -140,7 +140,215 @@ body {
   transform: translateY(-2px);
 }
 
-/* ── Glow Button ── */
+/* ── Get Started Button (Uiverse) ── */
+.btn-get-started {
+  background: var(--secondary);
+  color: white;
+  font-family: var(--font-display);
+  padding: 0.35em;
+  padding-left: 1.2em;
+  font-size: 17px;
+  font-weight: 600;
+  border-radius: 0.9em;
+  border: none;
+  letter-spacing: 0.05em;
+  display: flex;
+  align-items: center;
+  box-shadow: inset 0 0 1.6em -0.6em rgba(124, 58, 237, 0.5);
+  overflow: hidden;
+  position: relative;
+  height: 2.8em;
+  padding-right: 3.3em;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-get-started .icon {
+  background: white;
+  margin-left: 1em;
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 2.2em;
+  width: 2.2em;
+  border-radius: 0.7em;
+  box-shadow: 0.1em 0.1em 0.6em 0.2em rgba(124, 58, 237, 0.3);
+  right: 0.3em;
+  transition: all 0.3s;
+}
+
+.btn-get-started:hover .icon {
+  width: calc(100% - 0.6em);
+}
+
+.btn-get-started .icon svg {
+  width: 1.1em;
+  transition: transform 0.3s;
+  color: var(--secondary);
+}
+
+.btn-get-started:hover .icon svg {
+  transform: translateX(0.1em);
+}
+
+.btn-get-started:active .icon {
+  transform: scale(0.95);
+}
+
+/* ── Aura Gradient Button ── */
+.btn-aura-gradient {
+  position: relative;
+  height: 3rem;
+  padding: 0 2rem;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  transition: all 0.5s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border: none;
+  background: transparent;
+}
+
+.btn-aura-gradient .bg-layers {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.btn-aura-gradient .layer-1 {
+  position: absolute;
+  inset: 0;
+  padding: 2px;
+  background: linear-gradient(to bottom, #3B82F6, #12121A, #7C3AED);
+  border-radius: 0.5rem;
+}
+
+.btn-aura-gradient .layer-2 {
+  position: absolute;
+  inset: 0;
+  background: #12121A;
+  border-radius: 0.5rem;
+  opacity: 0.9;
+}
+
+.btn-aura-gradient .layer-3 {
+  position: absolute;
+  inset: 2px;
+  background: #12121A;
+  border-radius: 0.5rem;
+  opacity: 0.95;
+}
+
+.btn-aura-gradient .layer-4 {
+  position: absolute;
+  inset: 2px;
+  background: linear-gradient(to right, #12121A, #1A1A27, #12121A);
+  border-radius: 0.5rem;
+  opacity: 0.9;
+}
+
+/* Interactive Feature Flip-Buttons - Refined Visibility */
+.feature-btn-container {
+  width: 100%;
+  height: 110px;
+  background: linear-gradient(to top, #00154c, #12376e, #23487f);
+  color: #fff;
+  border-radius: 16px;
+  border: 1px solid rgba(96, 165, 250, 0.2);
+  /* Subtle blue border for visibility */
+  outline: none;
+  cursor: pointer;
+  position: relative;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+
+.feature-btn-container:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6), 0 0 20px rgba(59, 130, 246, 0.2);
+  border-color: rgba(96, 165, 250, 0.5);
+  background: linear-gradient(to top, #002a7a, #1a4f9e, #2e59a1);
+}
+
+.feature-btn-container span {
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  transition: top 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+  font-family: 'Outfit', sans-serif;
+  font-weight: 800;
+  width: 100%;
+  position: absolute;
+  left: 0;
+  text-align: center;
+  pointer-events: none;
+}
+
+.btn-text-one {
+  top: 50%;
+  transform: translateY(-50%);
+  opacity: 1;
+}
+
+.btn-text-two {
+  top: 150%;
+  transform: translateY(-50%);
+  opacity: 0;
+  color: #60A5FA;
+}
+
+.feature-btn-container:hover .btn-text-one {
+  top: -100%;
+  opacity: 0;
+}
+
+.feature-btn-container:hover .btn-text-two {
+  top: 50%;
+  opacity: 1;
+}
+
+.btn-aura-gradient .layer-5 {
+  position: absolute;
+  inset: 2px;
+  background: linear-gradient(to bottom, rgba(59, 130, 246, 0.2), #1A1A27, rgba(124, 58, 237, 0.15));
+  border-radius: 0.5rem;
+  opacity: 0.8;
+}
+
+.btn-aura-gradient .label {
+  position: relative;
+  z-index: 10;
+  font-size: 1rem;
+  font-weight: 500;
+  background: linear-gradient(to bottom, #60A5FA, #7C3AED);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.4));
+  letter-spacing: -0.025em;
+}
+
+.btn-aura-gradient .hover-layer {
+  position: absolute;
+  inset: 2px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  background: linear-gradient(to right, rgba(59, 130, 246, 0.1), rgba(124, 58, 237, 0.1), rgba(59, 130, 246, 0.1));
+  border-radius: 0.5rem;
+}
+
+.btn-aura-gradient:hover .hover-layer {
+  opacity: 1;
+}
+
+/* ── Original Glow Button (kept for fallback) ── */
 .btn-glow {
   background: linear-gradient(135deg, #3B82F6, #7C3AED);
   border: none;

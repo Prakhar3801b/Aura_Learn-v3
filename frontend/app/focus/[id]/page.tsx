@@ -4,6 +4,7 @@ import { useEffect, useState, use } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getFlashcards, getExamPoints } from '@/lib/api';
 import Link from 'next/link';
+import { AuraButton } from '@/components/AuraButton';
 
 export default function FocusPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = use(params);
@@ -44,8 +45,10 @@ export default function FocusPage({ params }: { params: Promise<{ id: string }> 
                 animate={{ opacity: 1, y: 0 }}
                 style={{ position: 'fixed', top: '1.5rem', left: 0, right: 0, zIndex: 10, display: 'flex', justifyContent: 'space-between', padding: '0 2rem' }}
             >
-                <Link href={`/study/${id}`} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#94A3B8', fontSize: '0.85rem', textDecoration: 'none', background: 'rgba(18,18,26,0.8)', backdropFilter: 'blur(20px)', padding: '0.5rem 1rem', borderRadius: '10px', border: '1px solid rgba(59,130,246,0.15)' }}>
-                    ← Exit Focus Mode
+                <Link href={`/study/${id}`} style={{ textDecoration: 'none' }}>
+                    <AuraButton size="sm">
+                        ← Exit Focus Mode
+                    </AuraButton>
                 </Link>
                 {/* Progress */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', background: 'rgba(18,18,26,0.8)', backdropFilter: 'blur(20px)', padding: '0.5rem 1.25rem', borderRadius: '10px', border: '1px solid rgba(59,130,246,0.15)' }}>
@@ -57,26 +60,16 @@ export default function FocusPage({ params }: { params: Promise<{ id: string }> 
                 </div>
             </motion.div>
 
-            {/* Mode Toggle */}
             <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '2rem' }}>
                 {(['flashcards', 'exampoints'] as const).map((m) => (
-                    <button
+                    <AuraButton
                         key={m}
+                        size="md"
+                        active={mode === m}
                         onClick={() => { setMode(m); setCardIndex(0); setFlipped(false); }}
-                        style={{
-                            padding: '0.5rem 1.25rem',
-                            borderRadius: '10px',
-                            background: mode === m ? 'rgba(59,130,246,0.2)' : 'rgba(18,18,26,0.7)',
-                            border: `1px solid ${mode === m ? 'rgba(59,130,246,0.5)' : 'rgba(59,130,246,0.1)'}`,
-                            color: mode === m ? '#60A5FA' : '#94A3B8',
-                            fontWeight: mode === m ? 700 : 400,
-                            fontSize: '0.85rem',
-                            cursor: 'pointer',
-                            backdropFilter: 'blur(20px)',
-                        }}
                     >
                         {m === 'flashcards' ? '⚡ Flashcards' : '🎯 Exam Points'}
-                    </button>
+                    </AuraButton>
                 ))}
             </div>
 
@@ -112,10 +105,9 @@ export default function FocusPage({ params }: { params: Promise<{ id: string }> 
                             </motion.div>
                         </div>
 
-                        {/* Navigation */}
                         <div style={{ display: 'flex', gap: '1rem', marginTop: '1.5rem', justifyContent: 'center' }}>
-                            <button onClick={() => { setFlipped(false); setCardIndex((i) => Math.max(i - 1, 0)); }} style={{ padding: '0.7rem 2rem', borderRadius: '12px', background: 'rgba(18,18,26,0.8)', border: '1px solid rgba(59,130,246,0.2)', color: '#60A5FA', cursor: 'pointer', fontWeight: 600, backdropFilter: 'blur(20px)' }}>← Prev</button>
-                            <button onClick={() => { setFlipped(false); setCardIndex((i) => Math.min(i + 1, flashcards.length - 1)); }} style={{ padding: '0.7rem 2rem', borderRadius: '12px', background: 'rgba(59,130,246,0.15)', border: '1px solid rgba(59,130,246,0.4)', color: '#60A5FA', cursor: 'pointer', fontWeight: 600 }}>Next →</button>
+                            <AuraButton size="md" onClick={() => { setFlipped(false); setCardIndex((i) => Math.max(i - 1, 0)); }}>← Prev</AuraButton>
+                            <AuraButton size="md" onClick={() => { setFlipped(false); setCardIndex((i) => Math.min(i + 1, flashcards.length - 1)); }}>Next →</AuraButton>
                         </div>
                     </motion.div>
                 </AnimatePresence>
@@ -134,8 +126,8 @@ export default function FocusPage({ params }: { params: Promise<{ id: string }> 
                             <p style={{ color: '#F1F5F9', fontSize: '1.15rem', lineHeight: 1.7, fontFamily: 'Outfit', fontWeight: 500 }}>{examPoints[cardIndex]?.point}</p>
                         </div>
                         <div style={{ display: 'flex', gap: '1rem', marginTop: '1.5rem', justifyContent: 'center' }}>
-                            <button onClick={() => setCardIndex((i) => Math.max(i - 1, 0))} style={{ padding: '0.7rem 2rem', borderRadius: '12px', background: 'rgba(18,18,26,0.8)', border: '1px solid rgba(59,130,246,0.2)', color: '#60A5FA', cursor: 'pointer', fontWeight: 600, backdropFilter: 'blur(20px)' }}>← Prev</button>
-                            <button onClick={() => setCardIndex((i) => Math.min(i + 1, examPoints.length - 1))} style={{ padding: '0.7rem 2rem', borderRadius: '12px', background: 'rgba(59,130,246,0.15)', border: '1px solid rgba(59,130,246,0.4)', color: '#60A5FA', cursor: 'pointer', fontWeight: 600 }}>Next →</button>
+                            <AuraButton size="md" onClick={() => setCardIndex((i) => Math.max(i - 1, 0))}>← Prev</AuraButton>
+                            <AuraButton size="md" onClick={() => setCardIndex((i) => Math.min(i + 1, examPoints.length - 1))}>Next →</AuraButton>
                         </div>
                     </motion.div>
                 </AnimatePresence>

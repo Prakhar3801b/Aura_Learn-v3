@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import { getUserMaterials } from '@/lib/api';
+import { AuraButton } from '@/components/AuraButton';
 
 const fileTypeIcon: Record<string, string> = { pdf: '📄', image: '🖼️', video: '🎬' };
 const statusColor: Record<string, string> = {
@@ -92,7 +93,9 @@ export default function DashboardPage() {
                         <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>📚</div>
                         <h3 style={{ fontFamily: 'Outfit', fontWeight: 700, color: '#F1F5F9', marginBottom: '0.5rem' }}>No materials yet</h3>
                         <p style={{ color: '#94A3B8', marginBottom: '1.5rem' }}>Upload your first PDF, image, or video to get started</p>
-                        <Link href="/upload" className="btn-glow" style={{ padding: '0.7rem 1.5rem', fontSize: '0.9rem' }}>Upload Now →</Link>
+                        <Link href="/upload" style={{ textDecoration: 'none' }}>
+                            <AuraButton size="md">Upload Now →</AuraButton>
+                        </Link>
                     </motion.div>
                 ) : (
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1rem' }}>

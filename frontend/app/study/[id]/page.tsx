@@ -9,6 +9,7 @@ import ExamPoints from '@/components/ExamPoints';
 import { getFlashcards, getExamPoints, getMindMap, getMaterial, updateFlashcardConfidence, startSession, recordEvent, Material, API_BASE } from '@/lib/api';
 import { supabase } from '@/lib/supabase';
 import Chatbox from '@/components/Chatbox';
+import { AuraButton } from '@/components/AuraButton';
 
 const MindMap = dynamic(() => import('@/components/MindMap'), { ssr: false });
 
@@ -167,59 +168,32 @@ export default function StudyPage({ params }: { params: Promise<{ id: string }> 
                         </p>
                     </div>
                     <div style={{ display: 'flex', gap: '0.75rem' }}>
-                        <button
-                            onClick={handleReprocess}
-                            style={{ padding: '0.6rem 1rem', borderRadius: '10px', background: 'rgba(59,130,246,0.1)', border: '1px solid rgba(59,130,246,0.2)', color: '#60A5FA', fontSize: '0.85rem', cursor: 'pointer' }}
-                        >
+                        <AuraButton size="md" onClick={handleReprocess}>
                             🔄 Reprocess
-                        </button>
-                        <Link
-                            href={`/focus/${id}`}
-                            style={{
-                                padding: '0.6rem 1.25rem',
-                                borderRadius: '10px',
-                                background: 'linear-gradient(135deg, rgba(124,58,237,0.2), rgba(59,130,246,0.2))',
-                                border: '1px solid rgba(124,58,237,0.4)',
-                                color: '#A78BFA',
-                                fontSize: '0.85rem',
-                                fontWeight: 600,
-                                textDecoration: 'none',
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '0.4rem',
-                            }}
-                        >
-                            ⚡ Focus Mode
+                        </AuraButton>
+                        <Link href={`/focus/${id}`} style={{ textDecoration: 'none' }}>
+                            <AuraButton size="md">
+                                ⚡ Focus Mode
+                            </AuraButton>
                         </Link>
-                        <Link href="/dashboard" style={{ padding: '0.6rem 1rem', borderRadius: '10px', background: 'rgba(18,18,26,0.8)', border: '1px solid rgba(59,130,246,0.2)', color: '#94A3B8', fontSize: '0.85rem', textDecoration: 'none' }}>
-                            ← Back
+                        <Link href="/dashboard" style={{ textDecoration: 'none' }}>
+                            <AuraButton size="md">
+                                ← Back
+                            </AuraButton>
                         </Link>
                     </div>
                 </div>
 
-                {/* Panel Tabs */}
                 <div style={{ display: 'flex', gap: '0.4rem', marginBottom: '1.25rem', flexWrap: 'wrap' }}>
                     {panels.map((p) => (
-                        <button
+                        <AuraButton
                             key={p.id}
+                            size="sm"
+                            active={activePanel === p.id}
                             onClick={() => setActivePanel(p.id)}
-                            style={{
-                                padding: '0.55rem 1.1rem',
-                                borderRadius: '10px',
-                                background: activePanel === p.id ? 'rgba(59,130,246,0.15)' : 'rgba(18,18,26,0.6)',
-                                border: `1px solid ${activePanel === p.id ? 'rgba(59,130,246,0.5)' : 'rgba(59,130,246,0.1)'}`,
-                                color: activePanel === p.id ? '#60A5FA' : '#94A3B8',
-                                fontWeight: activePanel === p.id ? 700 : 400,
-                                fontSize: '0.85rem',
-                                cursor: 'pointer',
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '0.4rem',
-                                transition: 'all 0.2s ease',
-                            }}
                         >
                             {p.icon} {p.label}
-                        </button>
+                        </AuraButton>
                     ))}
                 </div>
             </div>

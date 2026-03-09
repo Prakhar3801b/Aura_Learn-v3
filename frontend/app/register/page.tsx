@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
+import { AuraButton } from '@/components/AuraButton';
 
 export default function RegisterPage() {
     const [email, setEmail] = useState('');
@@ -63,7 +64,9 @@ export default function RegisterPage() {
                     /* ── Registration Form ── */
                     <>
                         <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-                            <div style={{ width: '52px', height: '52px', borderRadius: '14px', background: 'linear-gradient(135deg, #3B82F6, #7C3AED)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1rem', boxShadow: '0 0 30px rgba(59,130,246,0.4)', fontSize: '1.4rem' }}>A</div>
+                            <div style={{ width: '52px', height: '52px', borderRadius: '14px', background: 'rgba(18,18,26,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1rem', overflow: 'hidden', border: '1px solid rgba(59,130,246,0.2)', boxShadow: '0 0 30px rgba(59,130,246,0.2)' }}>
+                                <img src="/logo.jpg" alt="Aura Learn" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                            </div>
                             <h1 style={{ fontFamily: 'Outfit', fontWeight: 700, fontSize: '1.6rem', color: '#F1F5F9', marginBottom: '0.4rem' }}>Create Your Account</h1>
                             <p style={{ color: '#94A3B8', fontSize: '0.9rem' }}>Start your AI-powered study journey</p>
                         </div>
@@ -86,9 +89,9 @@ export default function RegisterPage() {
                                 <div style={{ background: 'rgba(239,68,68,0.12)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: '8px', padding: '0.75rem', color: '#EF4444', fontSize: '0.85rem' }}>{error}</div>
                             )}
 
-                            <button type="submit" className="btn-glow" disabled={loading} style={{ marginTop: '0.5rem', opacity: loading ? 0.7 : 1 }}>
+                            <AuraButton type="submit" disabled={loading} className="w-full" style={{ marginTop: '0.5rem', width: '100%' }}>
                                 {loading ? 'Creating account...' : 'Create Account →'}
-                            </button>
+                            </AuraButton>
                         </form>
 
                         <p style={{ textAlign: 'center', color: '#94A3B8', fontSize: '0.85rem', marginTop: '1.5rem' }}>

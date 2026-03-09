@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { AuraButton } from './AuraButton';
 
 interface ExamPoint {
     id: string;
@@ -53,16 +54,22 @@ export default function ExamPoints({ examPoints }: ExamPointsProps) {
             {/* Topic Filter */}
             {topics.length > 1 && (
                 <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
-                    <button
+                    <AuraButton
+                        size="sm"
+                        active={filter === 'all'}
                         onClick={() => setFilter('all')}
-                        style={{ padding: '0.3rem 0.75rem', borderRadius: '20px', background: filter === 'all' ? 'rgba(59,130,246,0.2)' : 'rgba(59,130,246,0.05)', border: `1px solid ${filter === 'all' ? 'rgba(59,130,246,0.5)' : 'rgba(59,130,246,0.15)'}`, color: '#60A5FA', fontSize: '0.75rem', cursor: 'pointer' }}
-                    >All</button>
+                    >
+                        All
+                    </AuraButton>
                     {topics.map((t) => (
-                        <button
+                        <AuraButton
                             key={t}
+                            size="sm"
+                            active={filter === t}
                             onClick={() => setFilter(t)}
-                            style={{ padding: '0.3rem 0.75rem', borderRadius: '20px', background: filter === t ? 'rgba(59,130,246,0.2)' : 'rgba(59,130,246,0.05)', border: `1px solid ${filter === t ? 'rgba(59,130,246,0.5)' : 'rgba(59,130,246,0.15)'}`, color: '#60A5FA', fontSize: '0.75rem', cursor: 'pointer' }}
-                        >{t}</button>
+                        >
+                            {t}
+                        </AuraButton>
                     ))}
                 </div>
             )}

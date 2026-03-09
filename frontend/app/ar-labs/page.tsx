@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { getARLabs } from '@/lib/api';
+import { AuraButton } from '@/components/AuraButton';
 
 const categoryColor: Record<string, string> = {
     physics: '#3B82F6',
@@ -51,22 +52,23 @@ export default function ARLabsPage() {
                     </p>
                 </motion.div>
 
-                {/* Category Filter */}
                 <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '2rem', flexWrap: 'wrap' }}>
-                    <button
+                    <AuraButton
+                        size="sm"
+                        active={filter === 'all'}
                         onClick={() => setFilter('all')}
-                        style={{ padding: '0.5rem 1.1rem', borderRadius: '10px', background: filter === 'all' ? 'rgba(59,130,246,0.2)' : 'rgba(18,18,26,0.6)', border: `1px solid ${filter === 'all' ? 'rgba(59,130,246,0.5)' : 'rgba(59,130,246,0.15)'}`, color: filter === 'all' ? '#60A5FA' : '#94A3B8', cursor: 'pointer', fontWeight: 600, fontSize: '0.85rem' }}
                     >
                         All ({labs.length})
-                    </button>
+                    </AuraButton>
                     {categories.map((cat) => (
-                        <button
+                        <AuraButton
                             key={cat}
+                            size="sm"
+                            active={filter === cat}
                             onClick={() => setFilter(cat)}
-                            style={{ padding: '0.5rem 1.1rem', borderRadius: '10px', background: filter === cat ? `${categoryColor[cat]}20` : 'rgba(18,18,26,0.6)', border: `1px solid ${filter === cat ? `${categoryColor[cat]}50` : 'rgba(59,130,246,0.15)'}`, color: filter === cat ? categoryColor[cat] : '#94A3B8', cursor: 'pointer', fontWeight: 600, fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}
                         >
                             {categoryIcon[cat]} {cat.charAt(0).toUpperCase() + cat.slice(1)} ({labs.filter((l) => l.category === cat).length})
-                        </button>
+                        </AuraButton>
                     ))}
                 </div>
 

@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
+import { AuraButton } from '@/components/AuraButton';
 
 export default function LoginPage() {
     const router = useRouter();
@@ -47,16 +48,17 @@ export default function LoginPage() {
                             width: '52px',
                             height: '52px',
                             borderRadius: '14px',
-                            background: 'linear-gradient(135deg, #3B82F6, #7C3AED)',
+                            background: 'rgba(18,18,26,0.8)',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
                             margin: '0 auto 1rem',
-                            boxShadow: '0 0 30px rgba(59,130,246,0.4)',
-                            fontSize: '1.4rem',
+                            overflow: 'hidden',
+                            border: '1px solid rgba(59,130,246,0.2)',
+                            boxShadow: '0 0 30px rgba(59,130,246,0.2)',
                         }}
                     >
-                        A
+                        <img src="/logo.jpg" alt="Aura Learn" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                     </div>
                     <h1 style={{ fontFamily: 'Outfit', fontWeight: 700, fontSize: '1.6rem', color: '#F1F5F9', marginBottom: '0.4rem' }}>
                         Welcome Back
@@ -95,14 +97,14 @@ export default function LoginPage() {
                         </div>
                     )}
 
-                    <button
+                    <AuraButton
                         type="submit"
-                        className="btn-glow"
                         disabled={loading}
-                        style={{ marginTop: '0.5rem', opacity: loading ? 0.7 : 1 }}
+                        className="w-full"
+                        style={{ marginTop: '0.5rem', width: '100%' }}
                     >
                         {loading ? 'Signing in...' : 'Sign In →'}
-                    </button>
+                    </AuraButton>
                 </form>
 
                 <p style={{ textAlign: 'center', color: '#94A3B8', fontSize: '0.85rem', marginTop: '1.5rem' }}>

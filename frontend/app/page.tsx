@@ -2,42 +2,43 @@
 
 import { motion } from 'framer-motion';
 import Link from 'next/link';
+import { AuraButton, GetStartedButton } from '@/components/AuraButton';
 
 const features = [
   {
-    icon: '🧠',
     title: 'AI Mind Maps',
-    desc: 'Interactive, clickable knowledge graphs auto-generated from any material. Video timestamps linked directly to nodes.',
+    short: 'VISUALIZE KNOWLEDGE',
+    href: '/dashboard',
     color: '#3B82F6',
   },
   {
-    icon: '⚡',
     title: 'Predictive Flashcards',
-    desc: 'Groq-powered Llama 3.3 generates exam-targeted Q&A with spaced-repetition confidence tracking.',
+    short: 'SMART STUDY',
+    href: '/dashboard',
     color: '#7C3AED',
   },
   {
-    icon: '🎯',
     title: 'Exam Point Extraction',
-    desc: 'Strictly outcome-driven results — critical facts, formulas, and definitions ranked by exam importance.',
+    short: 'OUTPUT DRIVEN',
+    href: '/dashboard',
     color: '#06B6D4',
   },
   {
-    icon: '🥽',
     title: 'WebXR AR Labs',
-    desc: '7 interactive labs — Physics, Chemistry, Biology — projected directly onto your desk via mobile browser. No app needed.',
+    short: 'AR LEARNING',
+    href: '/ar-labs',
     color: '#10B981',
   },
   {
-    icon: '🎧',
     title: 'Video Intelligence',
-    desc: 'Whisper AI transcribes video lectures and links precise timestamps to mind map nodes.',
+    short: 'SMART TRANSCRIPTION',
+    href: '/upload',
     color: '#F59E0B',
   },
   {
-    icon: '📊',
     title: 'Real-Time Analytics',
-    desc: 'Session monitoring with anomaly detection. The system adapts when your comprehension drops.',
+    short: 'GROWTH TRACKING',
+    href: '/dashboard',
     color: '#EF4444',
   },
 ];
@@ -93,11 +94,11 @@ export default function LandingPage() {
               fontSize: 'clamp(2.4rem, 7vw, 5rem)',
               fontWeight: 800,
               lineHeight: 1.1,
-              marginBottom: '1.5rem',
+              marginBottom: '3rem',
               color: '#F1F5F9',
             }}
           >
-            The Study Engine That{' '}
+            The Engine Behind{' '}
             <span
               style={{
                 background: 'linear-gradient(135deg, #60A5FA, #7C3AED, #06B6D4)',
@@ -105,32 +106,17 @@ export default function LandingPage() {
                 WebkitTextFillColor: 'transparent',
               }}
             >
-              Guarantees Results
+              Better Grades
             </span>
           </h1>
 
-          {/* Subheadline */}
-          <p
-            style={{
-              color: '#94A3B8',
-              fontSize: '1.15rem',
-              lineHeight: 1.7,
-              maxWidth: '640px',
-              margin: '0 auto 3rem',
-            }}
-          >
-            Upload any PDF, handwritten note, or video lecture. Aura Learn generates
-            targeted exam points, predictive flashcards, interactive mind maps, and
-            WebXR AR labs — all backed by real-time AI analytics.
-          </p>
 
-          {/* CTA */}
           <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
-            <Link href="/register" className="btn-glow" style={{ fontSize: '1rem', padding: '0.9rem 2rem' }}>
-              Start Learning Free →
+            <Link href="/register">
+              <GetStartedButton>Start Learning Free</GetStartedButton>
             </Link>
-            <Link href="/ar-labs" className="btn-outline" style={{ fontSize: '1rem', padding: '0.9rem 2rem' }}>
-              Explore AR Labs
+            <Link href="/ar-labs">
+              <AuraButton>Explore AR Labs</AuraButton>
             </Link>
           </div>
         </motion.div>
@@ -214,37 +200,13 @@ export default function LandingPage() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: i * 0.08 }}
-              className="glass-card"
-              style={{ padding: '2rem' }}
             >
-              <div
-                style={{
-                  width: '48px',
-                  height: '48px',
-                  borderRadius: '12px',
-                  background: `${f.color}20`,
-                  border: `1px solid ${f.color}40`,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: '1.5rem',
-                  marginBottom: '1rem',
-                }}
-              >
-                {f.icon}
-              </div>
-              <h3
-                style={{
-                  fontFamily: 'Outfit',
-                  fontWeight: 700,
-                  fontSize: '1.1rem',
-                  color: '#F1F5F9',
-                  marginBottom: '0.6rem',
-                }}
-              >
-                {f.title}
-              </h3>
-              <p style={{ color: '#94A3B8', fontSize: '0.9rem', lineHeight: 1.6 }}>{f.desc}</p>
+              <Link href={f.href || '#'}>
+                <button className="feature-btn-container">
+                  <span className="btn-text-one">{f.title.toUpperCase()}</span>
+                  <span className="btn-text-two">{f.short}</span>
+                </button>
+              </Link>
             </motion.div>
           ))}
         </div>
@@ -279,8 +241,8 @@ export default function LandingPage() {
           <p style={{ color: '#94A3B8', marginBottom: '2rem', fontSize: '1rem' }}>
             Upload your first material and get AI-powered results in seconds.
           </p>
-          <Link href="/register" className="btn-glow" style={{ fontSize: '1rem', padding: '0.9rem 2.5rem' }}>
-            Create Free Account →
+          <Link href="/register">
+            <GetStartedButton>Create Free Account</GetStartedButton>
           </Link>
         </motion.div>
       </section>

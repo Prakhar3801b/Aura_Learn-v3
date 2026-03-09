@@ -7,6 +7,7 @@ import { supabase } from '@/lib/supabase';
 import { uploadMaterial } from '@/lib/api';
 import { useRouter } from 'next/navigation';
 import Chatbox from '@/components/Chatbox';
+import { AuraButton } from '@/components/AuraButton';
 
 const ACCEPTED_TYPES: Accept = {
     'application/pdf': ['.pdf'],
@@ -189,14 +190,15 @@ export default function UploadPage() {
                 )}
 
                 {/* Submit */}
-                <button
-                    className="btn-glow"
+                <AuraButton
+                    size="lg"
                     onClick={handleUpload}
                     disabled={!file || !title.trim() || uploading}
-                    style={{ width: '100%', fontSize: '1rem', padding: '0.9rem', opacity: (!file || !title.trim() || uploading) ? 0.5 : 1 }}
+                    className="w-full"
+                    style={{ width: '100%', opacity: (!file || !title.trim() || uploading) ? 0.5 : 1 }}
                 >
                     {uploading ? 'Processing...' : 'Upload & Analyze with AI →'}
-                </button>
+                </AuraButton>
 
                 {/* Info blurb */}
                 <div style={{ marginTop: '1.5rem', background: 'rgba(59,130,246,0.06)', border: '1px solid rgba(59,130,246,0.15)', borderRadius: '12px', padding: '1rem 1.25rem' }}>

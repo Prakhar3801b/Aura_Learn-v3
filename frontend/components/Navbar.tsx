@@ -30,9 +30,10 @@ export default function Navbar() {
                     borderBottom: '1px solid rgba(59,130,246,0.15)',
                 }}
             >
-                <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-                    {/* Logo */}
-                    <Link href="/" className="flex items-center gap-3 group">
+                <div className="max-w-full mx-auto px-8 py-4 grid grid-cols-3 items-center">
+                    {/* Column 1: Logo (Left) */}
+                    <Link href="/" className="flex items-center gap-3 group justify-self-start">
+                        {/* Original Logo (Rollback):
                         <div
                             style={{
                                 background: 'linear-gradient(135deg, #3B82F6, #7C3AED)',
@@ -43,6 +44,17 @@ export default function Navbar() {
                         >
                             <span style={{ fontSize: '1rem', fontWeight: 800, color: '#fff', fontFamily: 'Outfit' }}>A</span>
                         </div>
+                        */}
+                        <img
+                            src="/logo.jpg"
+                            alt="Aura Learn Logo"
+                            style={{
+                                width: '36px',
+                                height: '36px',
+                                borderRadius: '8px',
+                                objectFit: 'cover'
+                            }}
+                        />
                         <span
                             style={{
                                 fontFamily: 'Outfit',
@@ -57,8 +69,8 @@ export default function Navbar() {
                         </span>
                     </Link>
 
-                    {/* Desktop Nav */}
-                    <div className="hidden md:flex items-center gap-1">
+                    {/* Column 2: Desktop Nav (Center) */}
+                    <div className="hidden md:flex items-center gap-1 justify-self-center">
                         {navLinks.map((link) => (
                             <Link
                                 key={link.href}
@@ -80,38 +92,53 @@ export default function Navbar() {
                         ))}
                     </div>
 
-                    {/* CTA Buttons */}
-                    <div className="hidden md:flex items-center gap-3">
+                    {/* Column 3: Mobile + Desktop CTAs (Right) */}
+                    <div className="flex items-center gap-2 md:gap-3 justify-self-end">
                         <Link
                             href="/login"
-                            style={{
-                                color: '#94A3B8',
-                                fontSize: '0.9rem',
-                                fontWeight: 500,
-                                textDecoration: 'none',
-                                padding: '0.5rem 1rem',
-                                transition: 'color 0.2s ease',
-                            }}
+                            className="btn-aura-gradient"
                         >
-                            Sign In
+                            <div className="bg-layers">
+                                <div className="layer-1"></div>
+                                <div className="layer-2"></div>
+                                <div className="layer-3"></div>
+                                <div className="layer-4"></div>
+                                <div className="layer-5"></div>
+                                <div className="hover-layer"></div>
+                            </div>
+                            <span className="label">Sign In</span>
                         </Link>
                         <Link
                             href="/register"
-                            className="btn-glow"
-                            style={{ fontSize: '0.9rem', padding: '0.5rem 1.25rem' }}
+                            className="btn-get-started"
                         >
-                            Get Started
+                            <span className="hidden sm:inline">Get Started</span>
+                            <span className="sm:hidden">Start</span>
+                            <div className="icon">
+                                <svg
+                                    height="20"
+                                    width="20"
+                                    viewBox="0 0 24 24"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                >
+                                    <path d="M0 0h24v24H0z" fill="none"></path>
+                                    <path
+                                        d="M16.172 11l-5.364-5.364 1.414-1.414L20 12l-7.778 7.778-1.414-1.414L16.172 13H4v-2z"
+                                        fill="currentColor"
+                                    ></path>
+                                </svg>
+                            </div>
                         </Link>
-                    </div>
 
-                    {/* Mobile Hamburger */}
-                    <button
-                        onClick={() => setMenuOpen(!menuOpen)}
-                        className="md:hidden"
-                        style={{ color: '#94A3B8', background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.5rem' }}
-                    >
-                        {menuOpen ? '✕' : '☰'}
-                    </button>
+                        {/* Mobile Hamburger */}
+                        <button
+                            onClick={() => setMenuOpen(!menuOpen)}
+                            className="md:hidden ml-2"
+                            style={{ color: '#94A3B8', background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.4rem' }}
+                        >
+                            {menuOpen ? '✕' : '☰'}
+                        </button>
+                    </div>
                 </div>
 
                 {/* Mobile Menu */}
@@ -139,9 +166,8 @@ export default function Navbar() {
                                 {link.label}
                             </Link>
                         ))}
-                        <div style={{ paddingTop: '1rem', display: 'flex', gap: '0.75rem' }}>
-                            <Link href="/login" style={{ color: '#94A3B8', textDecoration: 'none', fontSize: '0.9rem' }}>Sign In</Link>
-                            <Link href="/register" className="btn-glow" style={{ fontSize: '0.85rem', padding: '0.5rem 1rem' }}>Get Started</Link>
+                        <div style={{ paddingTop: '1rem' }}>
+                            <Link href="/dashboard" style={{ color: '#60A5FA', textDecoration: 'none', fontSize: '0.95rem', fontWeight: 600 }}>Go to App →</Link>
                         </div>
                     </motion.div>
                 )}

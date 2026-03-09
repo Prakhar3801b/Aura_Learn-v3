@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { AuraButton } from './AuraButton';
 
 interface FlashCard {
     id: string;
@@ -141,26 +142,28 @@ export default function Flashcards({ flashcards, onConfidenceUpdate }: Flashcard
                         initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
                         style={{ display: 'flex', gap: '0.75rem' }}
                     >
-                        <button
+                        <AuraButton
                             onClick={() => handleAnswer(false)}
-                            style={{ flex: 1, padding: '0.7rem', borderRadius: '10px', background: 'rgba(239,68,68,0.12)', border: '1px solid rgba(239,68,68,0.3)', color: '#EF4444', fontWeight: 600, cursor: 'pointer', fontSize: '0.9rem' }}
+                            variant="danger"
+                            className="flex-1"
                         >
                             ✗ Missed
-                        </button>
-                        <button
+                        </AuraButton>
+                        <AuraButton
                             onClick={() => handleAnswer(true)}
-                            style={{ flex: 1, padding: '0.7rem', borderRadius: '10px', background: 'rgba(16,185,129,0.12)', border: '1px solid rgba(16,185,129,0.3)', color: '#10B981', fontWeight: 600, cursor: 'pointer', fontSize: '0.9rem' }}
+                            variant="success"
+                            className="flex-1"
                         >
                             ✓ Got it
-                        </button>
+                        </AuraButton>
                     </motion.div>
                 )}
             </AnimatePresence>
 
             {/* Navigation */}
             <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center' }}>
-                <button onClick={() => { setFlipped(false); setIndex((i) => Math.max(i - 1, 0)); }} style={{ padding: '0.4rem 1rem', borderRadius: '8px', background: 'rgba(59,130,246,0.1)', border: '1px solid rgba(59,130,246,0.2)', color: '#60A5FA', cursor: 'pointer', fontSize: '0.85rem' }}>← Prev</button>
-                <button onClick={() => { setFlipped(false); setIndex((i) => (i + 1) % total); }} style={{ padding: '0.4rem 1rem', borderRadius: '8px', background: 'rgba(59,130,246,0.1)', border: '1px solid rgba(59,130,246,0.2)', color: '#60A5FA', cursor: 'pointer', fontSize: '0.85rem' }}>Next →</button>
+                <AuraButton size="sm" onClick={() => { setFlipped(false); setIndex((i) => Math.max(i - 1, 0)); }}>← Prev</AuraButton>
+                <AuraButton size="sm" onClick={() => { setFlipped(false); setIndex((i) => (i + 1) % total); }}>Next →</AuraButton>
             </div>
         </div>
     );

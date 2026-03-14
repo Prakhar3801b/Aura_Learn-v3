@@ -87,11 +87,58 @@ async def trigger_reprocess(material_id: str):
     return {"status": "reprocessing queued", "material_id": material_id}
 
 
+class PracticalEvaluateRequest(BaseModel):
+    challenge: str
+    answer: str
+
+@router.post("/practical/generate/{material_id}")
+async def generate_practical(material_id: str):
+    """Generate a practical study challenge."""
+    try:
+        text = await rag_service.get_material_text(material_id)
+        if not text:
+            raise HTTPException(404, "No content found for this material")
+        challenge = await rag_service.ai_service.generate_practical_challenge(text)
+        return challenge
+    except Exception as e:
+        logger.error(f"Practical generation failed: {e}")
+        raise HTTPException(500, str(e))
+
+@router.post("/practical/evaluate/{material_id}")
+async def evaluate_practical(material_id: str, request: PracticalEvaluateRequest):
+    """Evaluate a student's answer to a practical challenge."""
+    try:
+        text = await rag_service.get_material_text(material_id)
+        feedback = await rag_service.ai_service.evaluate_practical_answer(text, request.challenge, request.answer)
+        return {"feedback": feedback}
+    except Exception as e:
+        logger.error(f"Practical evaluation failed: {e}")
+        raise HTTPException(500, str(e))
+
+class ChatRequest(BaseModel):
+    question: str
+    user_id: Optional[str] = None
+
+class MultiChatRequest(BaseModel):
+    material_ids: List[str]
+    question: str
+    user_id: Optional[str] = None
+
+@router.post("/chat-multi")
+async def chat_multi(request: MultiChatRequest):
+    """Chat across multiple study materials."""
+    try:
+        result = await rag_service.answer_question(request.material_ids, request.question, request.user_id)
+        return result
+    except Exception as e:
+        logger.error(f"Multi-Chat failed: {e}")
+        raise HTTPException(500, str(e))
+
 @router.post("/chat/{material_id}")
 async def chat_with_material(material_id: str, request: ChatRequest):
     """Chat with the study material using RAG."""
     try:
-        result = await rag_service.answer_question(material_id, request.question)
+        result = await rag_service.answer_question(material_id, request.question, request.user_id)
         return result
     except Exception as e:
         logger.error(f"Chat failed: {e}")

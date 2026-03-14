@@ -1,76 +1,81 @@
-'use client';
-
 import React from 'react';
+import { motion } from 'framer-motion';
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
     children: React.ReactNode;
     active?: boolean;
     size?: 'sm' | 'md' | 'lg';
-    variant?: 'primary' | 'success' | 'danger';
+    variant?: 'primary' | 'outline' | 'success' | 'danger';
+    loading?: boolean;
 }
 
-export function AuraButton({ children, className = '', active, size = 'md', variant = 'primary', ...props }: ButtonProps) {
-    const sizeClasses = size === 'sm' ? 'h-9 px-4 text-xs' : size === 'lg' ? 'h-14 px-10 text-xl' : 'h-12 px-8 text-base';
-
-    const gradients = {
-        primary: {
-            layer1: 'linear-gradient(to bottom, #3B82F6, #12121A, #7C3AED)',
-            label: 'linear-gradient(to bottom, #60A5FA, #7C3AED)',
-            glow: 'rgba(59, 130, 246, 0.4)',
-            hover: 'linear-gradient(to right, rgba(59, 130, 246, 0.1), rgba(124, 58, 237, 0.1), rgba(59, 130, 246, 0.1))'
-        },
-        success: {
-            layer1: 'linear-gradient(to bottom, #10B981, #12121A, #059669)',
-            label: 'linear-gradient(to bottom, #34D399, #10B981)',
-            glow: 'rgba(16, 185, 129, 0.4)',
-            hover: 'linear-gradient(to right, rgba(16, 185, 129, 0.1), rgba(5, 96, 105, 0.1), rgba(16, 185, 129, 0.1))'
-        },
-        danger: {
-            layer1: 'linear-gradient(to bottom, #EF4444, #12121A, #B91C1C)',
-            label: 'linear-gradient(to bottom, #F87171, #EF4444)',
-            glow: 'rgba(239, 68, 68, 0.4)',
-            hover: 'linear-gradient(to right, rgba(239, 68, 68, 0.1), rgba(185, 28, 28, 0.1), rgba(239, 68, 68, 0.1))'
-        }
+export function AuraButton({
+    children,
+    className = '',
+    active,
+    size = 'md',
+    variant = 'outline',
+    style,
+    loading,
+    ...props
+}: ButtonProps) {
+    const sizeStyles: Record<string, React.CSSProperties> = {
+        sm: { height: '2rem', padding: '0 0.75rem', fontSize: '0.78rem' },
+        md: { height: '2.5rem', padding: '0 1.25rem', fontSize: '0.85rem' },
+        lg: { height: '3rem', padding: '0 2rem', fontSize: '1rem' },
     };
 
-    const g = gradients[variant];
+    const variantStyles: Record<string, React.CSSProperties> = {
+        primary: {
+            background: '#1A1A2E',
+            color: '#fff',
+            border: 'none',
+        },
+        outline: {
+            background: active ? 'rgba(26, 26, 46, 0.06)' : 'transparent',
+            color: '#1A1A2E',
+            border: active ? '1px solid #1A1A2E' : '1px solid #E8E2DA',
+        },
+        success: {
+            background: '#D4F5E9',
+            color: '#1A6B3C',
+            border: '1px solid #B8E8D4',
+        },
+        danger: {
+            background: '#FFD6D6',
+            color: '#B91C1C',
+            border: '1px solid #FFBDBD',
+        },
+    };
 
     return (
         <button
-            className={`btn-aura-gradient ${sizeClasses} ${className}`}
+            className={className}
             style={{
-                opacity: active === false ? 0.6 : 1,
-                transform: active ? 'scale(0.98)' : 'none',
-                height: size === 'sm' ? '2.2rem' : size === 'lg' ? '3.5rem' : '2.8rem',
-                padding: size === 'sm' ? '0 1rem' : size === 'lg' ? '0 2.5rem' : '0 1.5rem',
+                fontWeight: 600,
+                borderRadius: '10px',
+                cursor: (props.disabled || loading) ? 'not-allowed' : 'pointer',
+                transition: 'all 0.2s ease',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '0.4rem',
+                opacity: (props.disabled || loading) ? 0.5 : 1,
+                ...sizeStyles[size],
+                ...variantStyles[variant],
+                ...style,
             }}
+            disabled={props.disabled || loading}
             {...props}
         >
-            <div className="bg-layers">
-                <div className="layer-1" style={{
-                    background: g.layer1,
-                    opacity: active === false ? 0.3 : 1
-                }}></div>
-                <div className="layer-2"></div>
-                <div className="layer-3"></div>
-                <div className="layer-4"></div>
-                <div className="layer-5" style={{
-                    background: variant === 'success' ? 'linear-gradient(to bottom, rgba(16, 185, 129, 0.2), #1A1A27, rgba(5, 96, 105, 0.15))' :
-                        variant === 'danger' ? 'linear-gradient(to bottom, rgba(239, 68, 68, 0.2), #1A1A27, rgba(185, 28, 28, 0.15))' :
-                            'linear-gradient(to bottom, rgba(59, 130, 246, 0.2), #1A1A27, rgba(124, 58, 237, 0.15))'
-                }}></div>
-                <div className="hover-layer" style={{ background: g.hover }}></div>
-                {active && (
-                    <div className="absolute inset-0 bg-white/5 animate-pulse pointer-events-none"></div>
-                )}
-            </div>
-            <span className="label" style={{
-                background: g.label,
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                filter: `drop-shadow(0 0 8px ${g.glow})`,
-                fontSize: size === 'sm' ? '0.8rem' : size === 'lg' ? '1.2rem' : '0.95rem'
-            }}>{children}</span>
+            {loading && (
+                <motion.div
+                    animate={{ rotate: 360 }}
+                    transition={{ repeat: Infinity, duration: 1, ease: 'linear' }}
+                    style={{ width: '1em', height: '1em', border: '2px solid rgba(255,255,255,0.3)', borderTop: '2px solid currentColor', borderRadius: '50%' }}
+                />
+            )}
+            {children}
         </button>
     );
 }

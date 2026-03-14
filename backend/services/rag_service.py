@@ -16,37 +16,69 @@ class RAGService:
         self.embedding_service = EmbeddingService()
         self.ai_service = AIService()
 
-    async def answer_question(self, material_id: str, question: str) -> Dict[str, Any]:
+    async def get_material_text(self, material_id: str) -> str:
+        """Fetch all text chunks for a material to provide full context."""
+        try:
+            res = self.supabase.table("material_chunks").select("text").eq("material_id", material_id).order("chunk_index").execute()
+            chunks = res.data or []
+            return "\n".join([c["text"] for c in chunks])
+        except Exception as e:
+            logger.error(f"Failed to fetch material text: {e}")
+            return ""
+
+    async def answer_question(self, material_id: Any, question: str, user_id: str = None) -> Dict[str, Any]:
         """
-        1. Embed the question.
-        2. Search for relevant context in Supabase.
-        3. Generate answer using Groq Llama 3.3.
+        1. Fetch user knowledge context (if user_id provided).
+        2. Embed the question.
+        3. Search for context (single or multi-material).
+        4. Generate personalized answer.
         """
         try:
-            # 1. Generate query embedding
+            # 1. Fetch user knowledge context
+            user_context = ""
+            if user_id:
+                state_res = self.supabase.table("user_knowledge_state").select("*").eq("user_id", user_id).execute()
+                states = state_res.data or []
+                if states:
+                    weak_topics = [s["topic"] for s in states if s["mastery_score"] < 0.5]
+                    if weak_topics:
+                        user_context = f"NOTE: The student currently struggles with these topics: {', '.join(weak_topics)}. Explain concepts related to these very clearly and simply."
+
+            # 2. Generate query embedding
             query_vector = self.embedding_service.embed_query(question)
             
-            # 2. Search vector store via RPC
-            # search_material_chunks is defined in migration 002
-            rpc_res = self.supabase.rpc(
-                "search_material_chunks",
-                {
-                    "query_embedding": query_vector,
-                    "match_material_id": material_id,
-                    "match_count": 5
-                }
-            ).execute()
+            # 3. Search vector store
+            if isinstance(material_id, list):
+                # Use multi-material search
+                rpc_res = self.supabase.rpc(
+                    "search_multi_material_chunks",
+                    {
+                        "query_embedding": query_vector,
+                        "match_material_ids": material_id,
+                        "match_count": 8
+                    }
+                ).execute()
+            else:
+                # Use single material search
+                rpc_res = self.supabase.rpc(
+                    "search_material_chunks",
+                    {
+                        "query_embedding": query_vector,
+                        "match_material_id": material_id,
+                        "match_count": 5
+                    }
+                ).execute()
             
             context_chunks = rpc_res.data or []
             context_text = "\n\n---\n\n".join([c["text"] for c in context_chunks])
             
             if not context_text:
-                context_text = "No specific context found in the study material for this question."
+                context_text = "No specific context found in the study material(s) for this question."
 
-            # 3. Build RAG prompt
-            prompt = f"""You are an expert study assistant for Aura Learn. Use the provided context from the study material to answer the student's question accurately.
+            # 4. Build RAG prompt with PERSONALIZATION
+            prompt = f"""You are an expert study assistant for Aura Learn. Use the provided context to answer the student's question.
 
-If the answer isn't in the context, be honest but try to use general knowledge related to the material if appropriate, while noting that the specific information wasn't found in the text.
+{user_context}
 
 ---
 STUDY MATERIAL CONTEXT:
@@ -57,13 +89,13 @@ STUDENT QUESTION: {question}
 
 Helpful, detailed answer:"""
 
-            # 4. Get LLM response
+            # 5. Get LLM response
             answer = self.ai_service._chat(prompt)
 
             return {
                 "answer": answer,
                 "sources": [
-                    {"chunk_index": c["chunk_index"], "similarity": c["similarity"]} 
+                    {"material_id": c["material_id"], "chunk_index": c["chunk_index"], "similarity": c["similarity"]} 
                     for c in context_chunks
                 ]
             }

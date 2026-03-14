@@ -21,9 +21,9 @@ interface MindMapProps {
 }
 
 function nodeTypeColor(type: string): string {
-    if (type === 'root') return '#7C3AED';
-    if (type === 'concept') return '#3B82F6';
-    return '#06B6D4';
+    if (type === 'root') return '#6B21A8';
+    if (type === 'concept') return '#1A1A2E';
+    return '#E07B5A';
 }
 
 function buildFlowNodes(rawNodes: any[]): Node[] {
@@ -32,18 +32,19 @@ function buildFlowNodes(rawNodes: any[]): Node[] {
         data: {
             label: (
                 <div style={{ textAlign: 'center', padding: '4px 8px' }}>
-                    <div style={{ fontWeight: 700, fontSize: '0.8rem', color: '#F1F5F9', marginBottom: '2px' }}>
+                    <div style={{ fontWeight: 700, fontSize: '0.8rem', color: '#1A1A2E', marginBottom: '2px' }}>
                         {n.label}
                     </div>
                     {n.video_timestamp_label && (
                         <div
                             style={{
                                 fontSize: '0.65rem',
-                                color: '#F59E0B',
-                                background: 'rgba(245,158,11,0.15)',
+                                color: '#8B6914',
+                                background: '#FFF5D6',
                                 borderRadius: '10px',
                                 padding: '1px 6px',
                                 display: 'inline-block',
+                                fontFamily: "'JetBrains Mono', monospace",
                             }}
                         >
                             ⏱ {n.video_timestamp_label}
@@ -57,12 +58,12 @@ function buildFlowNodes(rawNodes: any[]): Node[] {
             y: 200 + Math.sin((i / rawNodes.length) * 2 * Math.PI) * 180,
         },
         style: {
-            background: 'rgba(18,18,26,0.95)',
+            background: '#FFFFFF',
             border: `2px solid ${n.color || nodeTypeColor(n.node_type)}`,
             borderRadius: '12px',
-            color: '#F1F5F9',
+            color: '#1A1A2E',
             minWidth: '120px',
-            boxShadow: `0 0 20px ${n.color || nodeTypeColor(n.node_type)}30`,
+            boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
         },
         type: 'default',
     }));
@@ -74,8 +75,8 @@ function buildFlowEdges(rawEdges: any[]): Edge[] {
         source: e.source,
         target: e.target,
         label: e.label,
-        style: { stroke: 'rgba(59,130,246,0.5)', strokeWidth: 2 },
-        labelStyle: { fill: '#94A3B8', fontSize: 10 },
+        style: { stroke: '#E8E2DA', strokeWidth: 2 },
+        labelStyle: { fill: '#7C7C8A', fontSize: 10 },
     }));
 }
 
@@ -116,15 +117,15 @@ export default function MindMap({ nodes: rawNodes, edges: rawEdges, onNodeClick 
                 fitView
                 attributionPosition="bottom-right"
             >
-                <Controls style={{ background: 'rgba(18,18,26,0.9)', border: '1px solid rgba(59,130,246,0.2)' }} />
+                <Controls style={{ background: '#FFFFFF', border: '1px solid #E8E2DA', borderRadius: '8px' }} />
                 <MiniMap
-                    style={{ background: 'rgba(18,18,26,0.9)', border: '1px solid rgba(59,130,246,0.2)' }}
+                    style={{ background: '#FFFFFF', border: '1px solid #E8E2DA', borderRadius: '8px' }}
                     nodeColor={(n) => {
                         const raw = rawNodes.find((r) => r.id === n.id);
-                        return raw?.color || '#3B82F6';
+                        return raw?.color || '#1A1A2E';
                     }}
                 />
-                <Background color="rgba(59,130,246,0.05)" gap={20} />
+                <Background color="rgba(26,26,46,0.04)" gap={20} />
             </ReactFlow>
         </div>
     );

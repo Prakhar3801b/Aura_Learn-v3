@@ -6,7 +6,6 @@ import { useDropzone, Accept } from 'react-dropzone';
 import { supabase } from '@/lib/supabase';
 import { uploadMaterial } from '@/lib/api';
 import { useRouter } from 'next/navigation';
-import Chatbox from '@/components/Chatbox';
 import { AuraButton } from '@/components/AuraButton';
 
 const ACCEPTED_TYPES: Accept = {
@@ -64,7 +63,6 @@ export default function UploadPage() {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) { setError('Please sign in to upload'); setUploading(false); return; }
 
-        // Simulate progress
         const progressInterval = setInterval(() => {
             setProgress((p) => Math.min(p + 8, 85));
         }, 400);
@@ -88,58 +86,53 @@ export default function UploadPage() {
     };
 
     return (
-        <div style={{ minHeight: '100vh', paddingTop: '100px', padding: '100px 2rem 4rem' }}>
-            <div style={{ maxWidth: '640px', margin: '0 auto' }}>
-                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-                    <h1 style={{ fontFamily: 'Outfit', fontSize: '2rem', fontWeight: 800, color: '#F1F5F9', marginBottom: '0.5rem' }}>
+        <div style={{ minHeight: '100vh', padding: '2.5rem' }}>
+            <div style={{ maxWidth: '600px' }}>
+                <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }}>
+                    <h1 style={{ fontSize: '1.8rem', fontWeight: 800, color: '#1A1A2E', marginBottom: '0.4rem' }}>
                         Upload Study Material
                     </h1>
-                    <p style={{ color: '#94A3B8', marginBottom: '2rem' }}>
+                    <p style={{ color: '#7C7C8A', marginBottom: '2rem', fontSize: '0.9rem' }}>
                         PDF, image (handwritten notes), or video lecture — our AI processes everything.
                     </p>
                 </motion.div>
 
                 {/* Dropzone */}
                 <motion.div
-                    initial={{ opacity: 0, y: 20 }}
+                    initial={{ opacity: 0, y: 15 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.1 }}
                     {...(getRootProps() as any)}
+                    className="card"
                     style={{
-                        border: `2px dashed ${isDragActive ? '#3B82F6' : file ? '#10B981' : 'rgba(59,130,246,0.3)'}`,
+                        border: `2px dashed ${isDragActive ? '#1A1A2E' : file ? '#34A853' : '#E8E2DA'}`,
                         borderRadius: '16px',
                         padding: '3rem 2rem',
                         textAlign: 'center',
                         cursor: 'pointer',
-                        background: isDragActive
-                            ? 'rgba(59,130,246,0.08)'
-                            : file
-                                ? 'rgba(16,185,129,0.05)'
-                                : 'rgba(18,18,26,0.6)',
-                        backdropFilter: 'blur(20px)',
+                        background: isDragActive ? 'rgba(26,26,46,0.03)' : file ? 'rgba(52,168,83,0.04)' : '#FFFFFF',
                         transition: 'all 0.3s ease',
                         marginBottom: '1.5rem',
+                        boxShadow: 'none',
                     }}
                 >
                     <input {...getInputProps()} />
                     <AnimatePresence mode="wait">
                         {file ? (
-                            <motion.div key="file" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}>
-                                <div style={{ fontSize: '3rem', marginBottom: '0.75rem' }}>{getIcon(file)}</div>
-                                <div style={{ fontWeight: 600, color: '#10B981', fontSize: '1rem', marginBottom: '0.25rem' }}>{file.name}</div>
-                                <div style={{ color: '#94A3B8', fontSize: '0.85rem' }}>{formatSize(file.size)}</div>
-                                <div style={{ color: '#94A3B8', fontSize: '0.8rem', marginTop: '0.5rem' }}>Click to change file</div>
+                            <motion.div key="file" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}>
+                                <div style={{ fontSize: '3rem', marginBottom: '0.6rem' }}>{getIcon(file)}</div>
+                                <div style={{ fontWeight: 600, color: '#34A853', fontSize: '0.95rem', marginBottom: '0.2rem' }}>{file.name}</div>
+                                <div style={{ color: '#7C7C8A', fontSize: '0.82rem', fontFamily: "'JetBrains Mono', monospace" }}>{formatSize(file.size)}</div>
+                                <div style={{ color: '#7C7C8A', fontSize: '0.78rem', marginTop: '0.4rem' }}>Click to change file</div>
                             </motion.div>
                         ) : (
                             <motion.div key="empty" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                                <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>☁️</div>
-                                <div style={{ fontWeight: 600, color: '#F1F5F9', fontSize: '1.1rem', marginBottom: '0.5rem' }}>
+                                <div style={{ fontSize: '2.5rem', marginBottom: '0.75rem' }}>☁️</div>
+                                <div style={{ fontWeight: 600, color: '#1A1A2E', fontSize: '1rem', marginBottom: '0.4rem' }}>
                                     {isDragActive ? 'Drop it here!' : 'Drag & drop your file'}
                                 </div>
-                                <div style={{ color: '#94A3B8', fontSize: '0.85rem', marginBottom: '1rem' }}>
-                                    or click to browse
-                                </div>
-                                <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+                                <div style={{ color: '#7C7C8A', fontSize: '0.82rem', marginBottom: '0.8rem' }}>or click to browse</div>
+                                <div style={{ display: 'flex', gap: '0.4rem', justifyContent: 'center', flexWrap: 'wrap' }}>
                                     {['PDF', 'PNG/JPG', 'MP4/WebM'].map((t) => (
                                         <span key={t} className="tag-badge">{t}</span>
                                     ))}
@@ -151,8 +144,8 @@ export default function UploadPage() {
 
                 {/* Title Input */}
                 {file && (
-                    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} style={{ marginBottom: '1.5rem' }}>
-                        <label style={{ display: 'block', color: '#94A3B8', fontSize: '0.85rem', marginBottom: '0.4rem' }}>Material Title</label>
+                    <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} style={{ marginBottom: '1.5rem' }}>
+                        <label style={{ display: 'block', color: '#7C7C8A', fontSize: '0.82rem', marginBottom: '0.35rem' }}>Material Title</label>
                         <input
                             className="aura-input"
                             placeholder="e.g. Chapter 4 — Thermodynamics"
@@ -165,13 +158,13 @@ export default function UploadPage() {
                 {/* Upload Progress */}
                 {uploading && (
                     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ marginBottom: '1.5rem' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-                            <span style={{ color: '#94A3B8', fontSize: '0.85rem' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.4rem' }}>
+                            <span style={{ color: '#7C7C8A', fontSize: '0.82rem' }}>
                                 {progress < 100 ? 'Uploading & processing...' : '✓ Complete! Redirecting...'}
                             </span>
-                            <span style={{ color: '#3B82F6', fontSize: '0.85rem', fontWeight: 600 }}>{progress}%</span>
+                            <span style={{ color: '#1A1A2E', fontSize: '0.82rem', fontWeight: 600, fontFamily: "'JetBrains Mono', monospace" }}>{progress}%</span>
                         </div>
-                        <div style={{ height: '4px', background: 'rgba(59,130,246,0.2)', borderRadius: '99px', overflow: 'hidden' }}>
+                        <div style={{ height: '4px', background: '#E8E2DA', borderRadius: '99px', overflow: 'hidden' }}>
                             <motion.div
                                 className="progress-bar"
                                 initial={{ width: 0 }}
@@ -184,35 +177,30 @@ export default function UploadPage() {
 
                 {/* Error */}
                 {error && (
-                    <div style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: '10px', padding: '0.75rem 1rem', color: '#EF4444', fontSize: '0.85rem', marginBottom: '1rem' }}>
+                    <div style={{ background: '#FFD6D6', border: '1px solid #FFBDBD', borderRadius: '10px', padding: '0.7rem 1rem', color: '#B91C1C', fontSize: '0.82rem', marginBottom: '1rem' }}>
                         {error}
                     </div>
                 )}
 
                 {/* Submit */}
                 <AuraButton
+                    variant="primary"
                     size="lg"
                     onClick={handleUpload}
                     disabled={!file || !title.trim() || uploading}
-                    className="w-full"
-                    style={{ width: '100%', opacity: (!file || !title.trim() || uploading) ? 0.5 : 1 }}
+                    style={{ width: '100%' }}
                 >
                     {uploading ? 'Processing...' : 'Upload & Analyze with AI →'}
                 </AuraButton>
 
                 {/* Info blurb */}
-                <div style={{ marginTop: '1.5rem', background: 'rgba(59,130,246,0.06)', border: '1px solid rgba(59,130,246,0.15)', borderRadius: '12px', padding: '1rem 1.25rem' }}>
-                    <p style={{ color: '#60A5FA', fontSize: '0.82rem', lineHeight: 1.6 }}>
+                <div style={{ marginTop: '1.5rem', background: '#D5E8F5', border: '1px solid #BDD8ED', borderRadius: '12px', padding: '1rem 1.2rem' }}>
+                    <p style={{ color: '#1A5276', fontSize: '0.8rem', lineHeight: 1.6 }}>
                         ✦ <strong>After upload</strong>, our AI will extract text (OCR for images, Whisper for videos),
                         generate flashcards, exam points, and an interactive mind map — all automatically.
                     </p>
                 </div>
             </div>
-
-            <Chatbox
-                initialMessage="I'm Aura, your AI study assistant. Upload a document, image, or video, and I'll help you master the content!"
-                placeholder="Ask how Aura Learn works..."
-            />
         </div>
     );
 }

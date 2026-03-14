@@ -1,107 +1,136 @@
 'use client';
 
 import { useState } from 'react';
-import { AuraButton } from './AuraButton';
-
-interface ExamPoint {
-    id: string;
-    point: string;
-    topic: string;
-    importance: string;
-}
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface ExamPointsProps {
-    examPoints: ExamPoint[];
+    examPoints: any[];
 }
 
-const importanceColor: Record<string, string> = {
-    critical: '#EF4444',
-    high: '#F59E0B',
-    medium: '#3B82F6',
-};
-const importanceIcon: Record<string, string> = {
-    critical: '🔴',
-    high: '🟡',
-    medium: '🔵',
+const importanceColors: Record<string, { bg: string; color: string }> = {
+    high: { bg: '#FFD6D6', color: '#B91C1C' },
+    medium: { bg: '#FFF5D6', color: '#8B6914' },
+    low: { bg: '#D4F5E9', color: '#1A6B3C' },
 };
 
 export default function ExamPoints({ examPoints }: ExamPointsProps) {
-    const [filter, setFilter] = useState<string>('all');
-    const [expanded, setExpanded] = useState<string | null>(null);
+    const [expandedId, setExpandedId] = useState<string | null>(null);
 
-    if (!examPoints.length) return (
-        <div style={{ textAlign: 'center', color: '#94A3B8', padding: '3rem' }}>
-            <div style={{ fontSize: '2.5rem', marginBottom: '0.75rem' }}>🎯</div>
-            <p>Processing exam points...</p>
-        </div>
+    // Sorting: Critical -> High -> Medium
+    const importanceWeight = { critical: 3, high: 2, medium: 1, low: 0 };
+    const sortedPoints = [...examPoints].sort((a, b) =>
+        (importanceWeight[b.importance as keyof typeof importanceWeight] || 0) -
+        (importanceWeight[a.importance as keyof typeof importanceWeight] || 0)
     );
 
-    const topics = Array.from(new Set(examPoints.map((e) => e.topic))).filter(Boolean);
-    const filtered = filter === 'all' ? examPoints : examPoints.filter((e) => e.topic === filter);
-    const criticalCount = examPoints.filter((e) => e.importance === 'critical').length;
+    const handleExport = () => {
+        window.print();
+    };
+
+    if (!sortedPoints.length) {
+        return (
+            <div style={{ textAlign: 'center', padding: '3rem', color: '#7C7C8A' }}>
+                <div style={{ fontSize: '2.5rem', marginBottom: '0.75rem' }}>🎯</div>
+                <p>No exam points generated yet.</p>
+            </div>
+        );
+    }
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', height: '100%', overflowY: 'auto' }}>
-            {/* Summary */}
-            <div style={{ display: 'flex', gap: '0.75rem', padding: '0.75rem', background: 'rgba(239,68,68,0.06)', border: '1px solid rgba(239,68,68,0.15)', borderRadius: '10px' }}>
-                <span style={{ fontSize: '1.2rem' }}>🎯</span>
-                <div>
-                    <div style={{ color: '#F1F5F9', fontWeight: 600, fontSize: '0.85rem' }}>{examPoints.length} Key Points Found</div>
-                    <div style={{ color: '#94A3B8', fontSize: '0.75rem' }}>{criticalCount} critical to review</div>
-                </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', maxWidth: '700px', margin: '0 auto' }}>
+            <div style={{
+                display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem',
+            }}>
+                <span style={{ color: '#7C7C8A', fontSize: '0.78rem' }}>
+                    {sortedPoints.length} exam points (Sorted by Importance)
+                </span>
+                <button
+                    onClick={handleExport}
+                    className="no-print"
+                    style={{
+                        background: '#FAF7F2',
+                        border: '1px solid #E8E2DA',
+                        borderRadius: '8px',
+                        padding: '0.4rem 0.8rem',
+                        fontSize: '0.75rem',
+                        fontWeight: 600,
+                        cursor: 'pointer',
+                        color: '#1A1A2E'
+                    }}
+                >
+                    💾 Export sheet
+                </button>
             </div>
 
-            {/* Topic Filter */}
-            {topics.length > 1 && (
-                <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
-                    <AuraButton
-                        size="sm"
-                        active={filter === 'all'}
-                        onClick={() => setFilter('all')}
-                    >
-                        All
-                    </AuraButton>
-                    {topics.map((t) => (
-                        <AuraButton
-                            key={t}
-                            size="sm"
-                            active={filter === t}
-                            onClick={() => setFilter(t)}
-                        >
-                            {t}
-                        </AuraButton>
-                    ))}
-                </div>
-            )}
-
-            {/* List */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                {filtered.map((ep) => (
-                    <div
-                        key={ep.id}
-                        onClick={() => setExpanded(expanded === ep.id ? null : ep.id)}
+            {sortedPoints.map((ep, i) => {
+                const imp = importanceColors[ep.importance] || importanceColors.medium;
+                return (
+                    <motion.div
+                        key={ep.id || i}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: i * 0.04 }}
+                        className="card"
                         style={{
-                            padding: '0.85rem 1rem',
-                            background: 'rgba(18,18,26,0.7)',
-                            border: `1px solid ${importanceColor[ep.importance] || '#94A3B8'}25`,
-                            borderLeft: `3px solid ${importanceColor[ep.importance] || '#94A3B8'}`,
-                            borderRadius: '10px',
+                            padding: '1.25rem',
                             cursor: 'pointer',
-                            transition: 'all 0.2s ease',
                         }}
+                        onClick={() => setExpandedId(expandedId === ep.id ? null : ep.id)}
                     >
-                        <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.6rem' }}>
-                            <span style={{ fontSize: '0.8rem', flexShrink: 0, marginTop: '2px' }}>{importanceIcon[ep.importance] || '⚪'}</span>
-                            <p style={{ color: '#F1F5F9', fontSize: '0.85rem', lineHeight: 1.5, flex: 1 }}>{ep.point}</p>
-                        </div>
-                        {ep.topic && (
-                            <div style={{ marginTop: '0.4rem', paddingLeft: '1.4rem' }}>
-                                <span style={{ color: '#94A3B8', fontSize: '0.7rem', fontStyle: 'italic' }}>{ep.topic}</span>
+                        <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem' }}>
+                            <span style={{
+                                fontSize: '0.7rem',
+                                fontWeight: 700,
+                                color: '#7C7C8A',
+                                background: '#F3F0EB',
+                                borderRadius: '6px',
+                                padding: '0.2rem 0.45rem',
+                                flexShrink: 0,
+                                marginTop: '0.1rem',
+                            }}>
+                                {String(i + 1).padStart(2, '0')}
+                            </span>
+                            <div style={{ flex: 1 }}>
+                                <div style={{ display: 'flex', gap: '0.4rem', marginBottom: '0.5rem', flexWrap: 'wrap' }}>
+                                    <span className="tag-badge">{ep.topic}</span>
+                                    {ep.importance && (
+                                        <span style={{
+                                            background: imp.bg,
+                                            color: imp.color,
+                                            fontSize: '0.65rem',
+                                            fontWeight: 600,
+                                            padding: '0.15rem 0.45rem',
+                                            borderRadius: '5px',
+                                            textTransform: 'uppercase',
+                                            letterSpacing: '0.05em',
+                                        }}>
+                                            {ep.importance}
+                                        </span>
+                                    )}
+                                </div>
+                                <p style={{ color: '#1A1A2E', fontSize: '0.88rem', lineHeight: 1.6, fontWeight: 500 }}>
+                                    {ep.point}
+                                </p>
+
+                                <AnimatePresence>
+                                    {expandedId === ep.id && ep.explanation && (
+                                        <motion.div
+                                            initial={{ opacity: 0, height: 0 }}
+                                            animate={{ opacity: 1, height: 'auto' }}
+                                            exit={{ opacity: 0, height: 0 }}
+                                            style={{ marginTop: '0.75rem', paddingTop: '0.75rem', borderTop: '1px solid #E8E2DA' }}
+                                        >
+                                            <p style={{ color: '#7C7C8A', fontSize: '0.82rem', lineHeight: 1.6 }}>
+                                                {ep.explanation}
+                                            </p>
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
                             </div>
-                        )}
-                    </div>
-                ))}
-            </div>
+                        </div>
+                    </motion.div>
+                );
+            })}
         </div>
     );
 }

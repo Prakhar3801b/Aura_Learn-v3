@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import VantaBackground from "@/components/VantaBackground";
-import Navbar from "@/components/Navbar";
+import Sidebar from "@/components/Sidebar";
+import ChatSidebar from "@/components/Chatbox";
 import ErrorBoundary from "@/components/ErrorBoundary";
 
 export const metadata: Metadata = {
@@ -20,15 +20,18 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body>
-        <VantaBackground />
-        <Navbar />
-        <main className="page-content">
-          <ErrorBoundary>
-            {children}
-          </ErrorBoundary>
-        </main>
+        <div className="app-layout">
+          <Sidebar />
+          <div className="app-main">
+            <main className="page-content">
+              <ErrorBoundary>
+                {children}
+              </ErrorBoundary>
+            </main>
+          </div>
+          <ChatSidebar />
+        </div>
       </body>
     </html>
   );
 }
-

@@ -35,68 +35,66 @@ export default function RegisterPage() {
     };
 
     return (
-        <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem', paddingTop: '80px' }}>
+        <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
             <motion.div
-                initial={{ opacity: 0, y: 30, scale: 0.97 }}
+                initial={{ opacity: 0, y: 20, scale: 0.98 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
-                transition={{ duration: 0.5 }}
-                className="glass-card"
-                style={{ width: '100%', maxWidth: '420px', padding: '2.5rem' }}
+                transition={{ duration: 0.4 }}
+                className="card"
+                style={{ width: '100%', maxWidth: '400px', padding: '2.5rem' }}
             >
                 {success ? (
-                    /* ── Success: Check your email ── */
-                    <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} style={{ textAlign: 'center' }}>
-                        <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>📧</div>
-                        <h2 style={{ fontFamily: 'Outfit', fontWeight: 700, fontSize: '1.4rem', color: '#F1F5F9', marginBottom: '0.5rem' }}>
+                    <motion.div initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} style={{ textAlign: 'center' }}>
+                        <div style={{ fontSize: '3rem', marginBottom: '0.75rem' }}>📧</div>
+                        <h2 style={{ fontWeight: 700, fontSize: '1.3rem', color: '#1A1A2E', marginBottom: '0.4rem' }}>
                             Check Your Email
                         </h2>
-                        <p style={{ color: '#94A3B8', fontSize: '0.9rem', lineHeight: 1.6, marginBottom: '0.5rem' }}>
+                        <p style={{ color: '#7C7C8A', fontSize: '0.88rem', lineHeight: 1.6, marginBottom: '0.4rem' }}>
                             We sent a confirmation link to
                         </p>
-                        <p style={{ color: '#60A5FA', fontWeight: 600, fontSize: '0.95rem', marginBottom: '1.5rem' }}>
+                        <p style={{ color: '#1A1A2E', fontWeight: 600, fontSize: '0.92rem', marginBottom: '1.25rem' }}>
                             {email}
                         </p>
-                        <p style={{ color: '#94A3B8', fontSize: '0.82rem', lineHeight: 1.6 }}>
-                            Click the link in the email to activate your account. Check your spam folder if you don't see it.
+                        <p style={{ color: '#7C7C8A', fontSize: '0.8rem', lineHeight: 1.6 }}>
+                            Click the link in the email to activate your account. Check spam if you don't see it.
                         </p>
                     </motion.div>
                 ) : (
-                    /* ── Registration Form ── */
                     <>
                         <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-                            <div style={{ width: '52px', height: '52px', borderRadius: '14px', background: 'rgba(18,18,26,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1rem', overflow: 'hidden', border: '1px solid rgba(59,130,246,0.2)', boxShadow: '0 0 30px rgba(59,130,246,0.2)' }}>
+                            <div style={{ width: '48px', height: '48px', borderRadius: '12px', overflow: 'hidden', margin: '0 auto 1rem', border: '1px solid #E8E2DA' }}>
                                 <img src="/logo.jpg" alt="Aura Learn" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                             </div>
-                            <h1 style={{ fontFamily: 'Outfit', fontWeight: 700, fontSize: '1.6rem', color: '#F1F5F9', marginBottom: '0.4rem' }}>Create Your Account</h1>
-                            <p style={{ color: '#94A3B8', fontSize: '0.9rem' }}>Start your AI-powered study journey</p>
+                            <h1 style={{ fontWeight: 700, fontSize: '1.5rem', color: '#1A1A2E', marginBottom: '0.3rem' }}>Create Your Account</h1>
+                            <p style={{ color: '#7C7C8A', fontSize: '0.88rem' }}>Start your AI-powered study journey</p>
                         </div>
 
                         <form onSubmit={handleRegister} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                             <div>
-                                <label style={{ display: 'block', color: '#94A3B8', fontSize: '0.85rem', marginBottom: '0.4rem' }}>Full Name</label>
+                                <label style={{ display: 'block', color: '#7C7C8A', fontSize: '0.82rem', marginBottom: '0.35rem' }}>Full Name</label>
                                 <input className="aura-input" type="text" placeholder="Your Name" value={fullName} onChange={(e) => setFullName(e.target.value)} required />
                             </div>
                             <div>
-                                <label style={{ display: 'block', color: '#94A3B8', fontSize: '0.85rem', marginBottom: '0.4rem' }}>Email</label>
+                                <label style={{ display: 'block', color: '#7C7C8A', fontSize: '0.82rem', marginBottom: '0.35rem' }}>Email</label>
                                 <input className="aura-input" type="email" placeholder="you@university.edu" value={email} onChange={(e) => setEmail(e.target.value)} required />
                             </div>
                             <div>
-                                <label style={{ display: 'block', color: '#94A3B8', fontSize: '0.85rem', marginBottom: '0.4rem' }}>Password</label>
+                                <label style={{ display: 'block', color: '#7C7C8A', fontSize: '0.82rem', marginBottom: '0.35rem' }}>Password</label>
                                 <input className="aura-input" type="password" placeholder="Min 8 characters" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={8} />
                             </div>
 
                             {error && (
-                                <div style={{ background: 'rgba(239,68,68,0.12)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: '8px', padding: '0.75rem', color: '#EF4444', fontSize: '0.85rem' }}>{error}</div>
+                                <div style={{ background: '#FFD6D6', border: '1px solid #FFBDBD', borderRadius: '8px', padding: '0.65rem', color: '#B91C1C', fontSize: '0.82rem' }}>{error}</div>
                             )}
 
-                            <AuraButton type="submit" disabled={loading} className="w-full" style={{ marginTop: '0.5rem', width: '100%' }}>
+                            <AuraButton type="submit" variant="primary" disabled={loading} style={{ marginTop: '0.4rem', width: '100%' }}>
                                 {loading ? 'Creating account...' : 'Create Account →'}
                             </AuraButton>
                         </form>
 
-                        <p style={{ textAlign: 'center', color: '#94A3B8', fontSize: '0.85rem', marginTop: '1.5rem' }}>
+                        <p style={{ textAlign: 'center', color: '#7C7C8A', fontSize: '0.82rem', marginTop: '1.5rem' }}>
                             Already have an account?{' '}
-                            <Link href="/login" style={{ color: '#60A5FA', textDecoration: 'none', fontWeight: 500 }}>Sign in</Link>
+                            <Link href="/login" style={{ color: '#1A1A2E', textDecoration: 'none', fontWeight: 600 }}>Sign in</Link>
                         </p>
                     </>
                 )}
@@ -104,4 +102,3 @@ export default function RegisterPage() {
         </div>
     );
 }
-

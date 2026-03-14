@@ -69,6 +69,37 @@ Return ONLY valid JSON with this structure:
 Colors: root=#7C3AED, concept=#06B6D4, detail=#10B981. Create 8-15 nodes total."""
 
 
+PRACTICAL_EXERCISE_PROMPT = """You are an expert practical tutor. Based on the study material, generate a "Practical Challenge" for the student.
+It should be one of:
+- A mini exercise
+- A simulation scenario
+- A real-world application problem
+- A practical task
+
+Study Material:
+{text}
+
+Generate a concise but challenging problem. Ask the question and wait for the student.
+Return ONLY valid JSON:
+{{
+  "challenge_type": "exercise|simulation|real-world|task",
+  "question": "...",
+  "instructions": "..."
+}}"""
+
+PRACTICAL_FEEDBACK_PROMPT = """You are an expert examiner. The student has provided an answer to a practical challenge.
+Based on the study material and the challenge, provide a detailed qualitative assessment.
+
+If the student asked for the full answer (e.g., "answer" or "explain"), provide a comprehensive response worth 5-14 marks, structured with bullet points and deep explanations.
+
+Challenge: {challenge}
+Student Answer: {answer}
+
+Material Context:
+{text}
+
+Return your feedback in a helpful, encouraging, yet rigorous academic tone."""
+
 class AIService:
     """LLM orchestration using Groq (Llama 3) to generate study outputs."""
 
@@ -189,6 +220,41 @@ class AIService:
         ]
 
         return MindMapGraph(material_id=material_id, nodes=nodes, edges=edges)
+
+    async def generate_practical_challenge(self, text: str) -> Dict[str, Any]:
+        """Generate a practical challenge/scenario from text."""
+        prompt = PRACTICAL_EXERCISE_PROMPT.format(text=text[:6000])
+        raw = self._chat(prompt)
+        return self._safe_json_parse(raw)
+
+    async def evaluate_practical_answer(self, text: str, challenge: Any, answer: str, user_id: str = None) -> Dict[str, Any]:
+        """Evaluate student response and update mastery state."""
+        prompt = PRACTICAL_FEEDBACK_PROMPT.format(text=text[:6000], challenge=json.dumps(challenge), answer=answer)
+        res = self._chat(prompt)
+        
+        # Simple qualitative to score mapping for mastery tracking
+        score = 0.5
+        if "excellent" in res.lower() or "perfect" in res.lower(): score = 0.95
+        elif "good" in res.lower() or "correct" in res.lower(): score = 0.75
+        elif "mistake" in res.lower() or "incorrect" in res.lower(): score = 0.3
+        
+        if user_id:
+            try:
+                from supabase import create_client
+                import os
+                supabase = create_client(os.getenv("SUPABASE_URL"), os.getenv("SUPABASE_KEY"))
+                
+                topic = challenge.get('topic', 'General') if isinstance(challenge, dict) else 'General'
+                supabase.table("user_knowledge_state").upsert({
+                    "user_id": user_id,
+                    "topic": topic,
+                    "mastery_score": score,
+                    "last_updated": "now()"
+                }, on_conflict="user_id,topic").execute()
+            except Exception as e:
+                logger.error(f"Mastery upsert failed: {e}")
+
+        return {"feedback": res, "score": score}
 
     def process_material(
         self,

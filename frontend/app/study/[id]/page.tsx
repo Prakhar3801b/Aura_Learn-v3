@@ -6,15 +6,16 @@ import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import Flashcards from '@/components/Flashcards';
 import ExamPoints from '@/components/ExamPoints';
-import { getFlashcards, getExamPoints, getMindMap, getMaterial, updateFlashcardConfidence, startSession, recordEvent, Material, API_BASE } from '@/lib/api';
+import { getFlashcards, getExamPoints, getMindMap, getConceptGraph, getMaterial, updateFlashcardConfidence, startSession, recordEvent, Material, API_BASE } from '@/lib/api';
 import { supabase } from '@/lib/supabase';
 import { AuraButton } from '@/components/AuraButton';
 
 const MindMap = dynamic(() => import('@/components/MindMap'), { ssr: false });
+const ConceptGraph = dynamic(() => import('@/components/ConceptGraph'), { ssr: false });
 
 import PracticalWorkshop from '@/components/PracticalWorkshop';
 
-type Panel = 'mindmap' | 'flashcards' | 'exampoints' | 'practical';
+type Panel = 'mindmap' | 'conceptgraph' | 'flashcards' | 'exampoints' | 'practical';
 
 export default function StudyPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = use(params);
@@ -22,6 +23,7 @@ export default function StudyPage({ params }: { params: Promise<{ id: string }> 
     const [flashcards, setFlashcards] = useState<any[]>([]);
     const [examPoints, setExamPoints] = useState<any[]>([]);
     const [mindMap, setMindMap] = useState<any>({ nodes: [], edges: [] });
+    const [conceptGraph, setConceptGraph] = useState<any>({ nodes: [], edges: [] });
     const [activePanel, setActivePanel] = useState<Panel>('mindmap');
     const [selectedNode, setSelectedNode] = useState<any>(null);
     const [sessionId, setSessionId] = useState<string>('');
@@ -39,14 +41,16 @@ export default function StudyPage({ params }: { params: Promise<{ id: string }> 
                 if (data?.learning_level) setLearningLevel(data.learning_level);
             }
 
-            const [fcs, eps, mm] = await Promise.all([
+            const [fcs, eps, mm, cg] = await Promise.all([
                 getFlashcards(id),
                 getExamPoints(id),
                 getMindMap(id),
+                getConceptGraph(id)
             ]);
             setFlashcards(fcs);
             setExamPoints(eps);
             setMindMap(mm);
+            setConceptGraph(cg);
 
             if (user && !sessionId) {
                 const session = await startSession(user.id, id);
@@ -105,6 +109,7 @@ export default function StudyPage({ params }: { params: Promise<{ id: string }> 
 
     const panels: { id: Panel; label: string; icon: string }[] = [
         { id: 'mindmap', label: 'Mind Map', icon: '🧠' },
+        { id: 'conceptgraph', label: 'Concept Graph', icon: '🕸️' },
         { id: 'flashcards', label: `Flashcards (${flashcards.length})`, icon: '⚡' },
         { id: 'exampoints', label: `Revision Sheet (${examPoints.length})`, icon: '📜' },
         { id: 'practical', label: 'Practical Workshop', icon: '🛠️' },
@@ -206,9 +211,9 @@ export default function StudyPage({ params }: { params: Promise<{ id: string }> 
                         transition={{ duration: 0.2 }}
                         className="card"
                         style={{
-                            height: activePanel === 'mindmap' ? '65vh' : 'auto',
+                            height: (activePanel === 'mindmap' || activePanel === 'conceptgraph') ? '65vh' : 'auto',
                             minHeight: '400px',
-                            padding: activePanel === 'mindmap' ? '0' : '1.5rem',
+                            padding: (activePanel === 'mindmap' || activePanel === 'conceptgraph') ? '0' : '1.5rem',
                             overflow: 'hidden',
                             position: 'relative',
                         }}
@@ -224,37 +229,58 @@ export default function StudyPage({ params }: { params: Promise<{ id: string }> 
                                         <button onClick={handleReprocess} style={{ marginTop: '0.75rem', color: '#1A1A2E', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline', fontSize: '0.85rem' }}>Try re-processing →</button>
                                     </div>
                                 )}
-                                {/* Node Detail Drawer */}
-                                <AnimatePresence>
-                                    {selectedNode && (
-                                        <motion.div
-                                            initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }}
-                                            transition={{ type: 'spring', damping: 25 }}
-                                            style={{
-                                                position: 'absolute', top: 0, right: 0, bottom: 0, width: '280px',
-                                                background: '#FFFFFF',
-                                                borderLeft: '1px solid #E8E2DA',
-                                                padding: '1.5rem',
-                                                overflowY: 'auto',
-                                                boxShadow: '-4px 0 16px rgba(0,0,0,0.05)',
-                                            }}
-                                        >
-                                            <button onClick={() => setSelectedNode(null)} style={{ position: 'absolute', top: '1rem', right: '1rem', background: 'none', border: 'none', color: '#7C7C8A', cursor: 'pointer', fontSize: '1.1rem' }}>✕</button>
-                                            <div style={{ fontWeight: 700, fontSize: '1.05rem', color: '#1A1A2E', marginBottom: '0.6rem', paddingRight: '1.5rem' }}>{selectedNode.label}</div>
-                                            {selectedNode.description && (
-                                                <p style={{ color: '#7C7C8A', fontSize: '0.82rem', lineHeight: 1.6, marginBottom: '1rem' }}>{selectedNode.description}</p>
-                                            )}
-                                            {selectedNode.video_timestamp_label && (
-                                                <div style={{ background: '#FFF5D6', border: '1px solid #FFE8A3', borderRadius: '10px', padding: '0.7rem' }}>
-                                                    <div style={{ color: '#8B6914', fontWeight: 600, fontSize: '0.82rem', marginBottom: '0.2rem' }}>⏱ Video Timestamp</div>
-                                                    <div style={{ color: '#1A1A2E', fontWeight: 700 }}>{selectedNode.video_timestamp_label}</div>
-                                                </div>
-                                            )}
-                                        </motion.div>
-                                    )}
-                                </AnimatePresence>
                             </div>
                         )}
+                        {activePanel === 'conceptgraph' && (
+                            <div style={{ height: '100%' }}>
+                                {conceptGraph.nodes && conceptGraph.nodes.length > 0 ? (
+                                    <ConceptGraph nodes={conceptGraph.nodes} edges={conceptGraph.edges} onNodeClick={handleNodeClick} />
+                                ) : (
+                                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#7C7C8A' }}>
+                                        <div style={{ fontSize: '3rem', marginBottom: '0.75rem' }}>🕸️</div>
+                                        <p>No concept graph nodes generated yet.</p>
+                                        <button onClick={handleReprocess} style={{ marginTop: '0.75rem', color: '#1A1A2E', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline', fontSize: '0.85rem' }}>Try re-processing →</button>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
+                        {/* Node Detail Drawer for both Graph types */}
+                        {(activePanel === 'mindmap' || activePanel === 'conceptgraph') && (
+                            <AnimatePresence>
+                                {selectedNode && (
+                                    <motion.div
+                                        initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }}
+                                        transition={{ type: 'spring', damping: 25 }}
+                                        style={{
+                                            position: 'absolute', top: 0, right: 0, bottom: 0, width: '280px',
+                                            background: '#FFFFFF',
+                                            borderLeft: '1px solid #E8E2DA',
+                                            padding: '1.5rem',
+                                            overflowY: 'auto',
+                                            boxShadow: '-4px 0 16px rgba(0,0,0,0.05)',
+                                            zIndex: 10
+                                        }}
+                                    >
+                                        <button onClick={() => setSelectedNode(null)} style={{ position: 'absolute', top: '1rem', right: '1rem', background: 'none', border: 'none', color: '#7C7C8A', cursor: 'pointer', fontSize: '1.1rem' }}>✕</button>
+                                        <div style={{ fontWeight: 700, fontSize: '1.05rem', color: '#1A1A2E', marginBottom: '0.6rem', paddingRight: '1.5rem' }}>{selectedNode.label}</div>
+                                        {selectedNode.description && (
+                                            <p style={{ color: '#7C7C8A', fontSize: '0.82rem', lineHeight: 1.6, marginBottom: '1rem' }}>{selectedNode.description}</p>
+                                        )}
+                                        {selectedNode.node_type === 'relation' && (
+                                            <div style={{ fontSize: '0.7rem', color: '#F59E0B', fontWeight: 600, textTransform: 'uppercase', background: '#FFF7ED', padding: '2px 8px', borderRadius: '4px', display: 'inline-block' }}>Relationship</div>
+                                        )}
+                                        {selectedNode.video_timestamp_label && (
+                                            <div style={{ background: '#FFF5D6', border: '1px solid #FFE8A3', borderRadius: '10px', padding: '0.7rem', marginTop: '1rem' }}>
+                                                <div style={{ color: '#8B6914', fontWeight: 600, fontSize: '0.82rem', marginBottom: '0.2rem' }}>⏱ Video Timestamp</div>
+                                                <div style={{ color: '#1A1A2E', fontWeight: 700 }}>{selectedNode.video_timestamp_label}</div>
+                                            </div>
+                                        )}
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+                        )}
+
                         {activePanel === 'flashcards' && (
                             <Flashcards flashcards={flashcards} onConfidenceUpdate={handleConfidenceUpdate} />
                         )}

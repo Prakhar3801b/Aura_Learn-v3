@@ -62,12 +62,38 @@ async def get_mind_map(material_id: str):
         supabase.table("mind_map_nodes")
         .select("*")
         .eq("material_id", material_id)
+        .eq("graph_type", "mindmap")
         .execute()
     )
     edges_res = (
         supabase.table("mind_map_edges")
         .select("*")
         .eq("material_id", material_id)
+        .eq("graph_type", "mindmap")
+        .execute()
+    )
+    return {
+        "material_id": material_id,
+        "nodes": nodes_res.data or [],
+        "edges": edges_res.data or [],
+    }
+
+
+@router.get("/conceptgraph/{material_id}")
+async def get_concept_graph(material_id: str):
+    supabase = get_supabase()
+    nodes_res = (
+        supabase.table("mind_map_nodes")
+        .select("*")
+        .eq("material_id", material_id)
+        .eq("graph_type", "conceptgraph")
+        .execute()
+    )
+    edges_res = (
+        supabase.table("mind_map_edges")
+        .select("*")
+        .eq("material_id", material_id)
+        .eq("graph_type", "conceptgraph")
         .execute()
     )
     return {

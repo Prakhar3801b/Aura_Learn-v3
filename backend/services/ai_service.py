@@ -69,36 +69,48 @@ Return ONLY valid JSON with this structure:
 Colors: root=#7C3AED, concept=#06B6D4, detail=#10B981. Create 8-15 nodes total."""
 
 
-PRACTICAL_EXERCISE_PROMPT = """You are an expert practical tutor. Based on the study material, generate a "Practical Challenge" for the student.
-It should be one of:
-- A mini exercise
-- A simulation scenario
-- A real-world application problem
-- A practical task
+CONCEPT_GRAPH_PROMPT = """You are an expert knowledge engineer. Analyze this study material and build a formal Concept Graph (bipartite graph).
+A Concept Graph consists of:
+1. Concept Nodes (Rectangles): Represent entities, attributes, or actions.
+2. Relation Nodes (Ovals/Circles): Define how concepts link together (e.g., "Agent", "Location", "Attribute").
+3. Arcs: Connect Concepts to Relations (never Concept to Concept or Relation to Relation).
 
 Study Material:
 {text}
 
-Generate a concise but challenging problem. Ask the question and wait for the student.
-Return ONLY valid JSON:
+Return ONLY valid JSON with this structure:
 {{
-  "challenge_type": "exercise|simulation|real-world|task",
-  "question": "...",
-  "instructions": "..."
-}}"""
+  "nodes": [
+    {{
+      "id": "c1",
+      "label": "Concept Name",
+      "node_type": "concept",
+      "description": "..."
+    }},
+    {{
+      "id": "r1",
+      "label": "RELATION",
+      "node_type": "relation"
+    }}
+  ],
+  "edges": [
+    {{
+      "id": "e1",
+      "source": "c1",
+      "target": "r1",
+      "label": "arc"
+    }},
+    {{
+      "id": "e2",
+      "source": "r1",
+      "target": "c2",
+      "label": "arc"
+    }}
+  ]
+}}
 
-PRACTICAL_FEEDBACK_PROMPT = """You are an expert examiner. The student has provided an answer to a practical challenge.
-Based on the study material and the challenge, provide a detailed qualitative assessment.
+Ensure it is a valid bipartite graph. Create 10-20 nodes total."""
 
-If the student asked for the full answer (e.g., "answer" or "explain"), provide a comprehensive response worth 5-14 marks, structured with bullet points and deep explanations.
-
-Challenge: {challenge}
-Student Answer: {answer}
-
-Material Context:
-{text}
-
-Return your feedback in a helpful, encouraging, yet rigorous academic tone."""
 
 class AIService:
     """LLM orchestration using Groq (Llama 3) to generate study outputs."""
@@ -199,6 +211,7 @@ class AIService:
             nodes.append(
                 MindMapNode(
                     id=node_data["id"],
+                    material_id=material_id,
                     label=node_data["label"],
                     topic=node_data.get("topic", ""),
                     description=node_data.get("description", ""),
@@ -206,20 +219,55 @@ class AIService:
                     video_timestamp_label=video_ts_label,
                     node_type=node_data.get("node_type", "concept"),
                     color=node_data.get("color"),
+                    graph_type="mindmap"
                 )
             )
 
         edges = [
             MindMapEdge(
                 id=e["id"],
+                material_id=material_id,
                 source=e["source"],
                 target=e["target"],
                 label=e.get("label"),
+                graph_type="mindmap"
             )
             for e in data.get("edges", [])
         ]
 
-        return MindMapGraph(material_id=material_id, nodes=nodes, edges=edges)
+        return MindMapGraph(material_id=material_id, nodes=nodes, edges=edges, graph_type="mindmap")
+
+    async def generate_concept_graph(self, text: str, material_id: str) -> MindMapGraph:
+        """Generate a bipartite concept graph from study text."""
+        prompt = CONCEPT_GRAPH_PROMPT.format(text=text[:6000])
+        raw = self._chat(prompt)
+        data = self._safe_json_parse(raw)
+
+        nodes = [
+            MindMapNode(
+                id=n["id"],
+                material_id=material_id,
+                label=n["label"],
+                topic=n.get("topic", ""),
+                description=n.get("description", ""),
+                node_type=n.get("node_type", "concept"),
+                graph_type="conceptgraph",
+                color="#7C3AED" if n.get("node_type") == "concept" else "#F59E0B"
+            )
+            for n in data.get("nodes", [])
+        ]
+        edges = [
+            MindMapEdge(
+                id=e["id"],
+                material_id=material_id,
+                source=e["source"],
+                target=e["target"],
+                label=e.get("label"),
+                graph_type="conceptgraph"
+            )
+            for e in data.get("edges", [])
+        ]
+        return MindMapGraph(material_id=material_id, nodes=nodes, edges=edges, graph_type="conceptgraph")
 
     async def generate_practical_challenge(self, text: str) -> Dict[str, Any]:
         """Generate a practical challenge/scenario from text."""
@@ -256,7 +304,7 @@ class AIService:
 
         return {"feedback": res, "score": score}
 
-    def process_material(
+    async def process_material(
         self,
         text: str,
         material_id: str,
@@ -268,12 +316,14 @@ class AIService:
         flashcards = self.generate_flashcards(text, material_id)
         exam_points = self.generate_exam_points(text, material_id)
         mind_map = self.generate_mind_map(text, material_id, transcript_segments)
+        concept_graph = await self.generate_concept_graph(text, material_id)
 
         return AIProcessingResult(
             material_id=material_id,
             flashcards=flashcards,
             exam_points=exam_points,
             mind_map=mind_map,
+            concept_graph=concept_graph,
             processing_time_seconds=round(time.time() - start, 2),
             model_used=self.model,
         )

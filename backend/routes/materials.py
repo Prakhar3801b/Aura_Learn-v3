@@ -57,7 +57,7 @@ async def process_material_background(
         if not text:
             raise ValueError("Could not extract text from material")
 
-        ai_result = ai_service.process_material(text, material_id, transcript_segments)
+        ai_result = await ai_service.process_material(text, material_id, transcript_segments)
 
         # Store flashcards
         flashcard_rows = [
@@ -89,37 +89,44 @@ async def process_material_background(
         if exam_rows:
             supabase.table("exam_points").insert(exam_rows).execute()
 
-        # Store mind map nodes
-        node_rows = [
-            {
-                "id": f"{material_id}_{node.id}",
-                "material_id": material_id,
-                "label": node.label,
-                "topic": node.topic,
-                "description": node.description,
-                "video_timestamp": node.video_timestamp,
-                "video_timestamp_label": node.video_timestamp_label,
-                "node_type": node.node_type,
-                "color": node.color,
-            }
-            for node in ai_result.mind_map.nodes
-        ]
-        if node_rows:
-            supabase.table("mind_map_nodes").insert(node_rows).execute()
+        # Function to store graphs (Mind Map / Concept Graph)
+        def store_graph(graph, gtype, prefix):
+            node_rows = [
+                {
+                    "id": f"{material_id}_{prefix}_{node.id}",
+                    "material_id": material_id,
+                    "label": node.label,
+                    "topic": node.topic,
+                    "description": node.description,
+                    "video_timestamp": node.video_timestamp,
+                    "video_timestamp_label": node.video_timestamp_label,
+                    "node_type": node.node_type,
+                    "color": node.color,
+                    "graph_type": gtype
+                }
+                for node in graph.nodes
+            ]
+            if node_rows:
+                supabase.table("mind_map_nodes").insert(node_rows).execute()
 
-        # Store mind map edges
-        edge_rows = [
-            {
-                "id": f"{material_id}_{edge.id}",
-                "material_id": material_id,
-                "source": f"{material_id}_{edge.source}",
-                "target": f"{material_id}_{edge.target}",
-                "label": edge.label,
-            }
-            for edge in ai_result.mind_map.edges
-        ]
-        if edge_rows:
-            supabase.table("mind_map_edges").insert(edge_rows).execute()
+            edge_rows = [
+                {
+                    "id": f"{material_id}_{prefix}_{edge.id}",
+                    "material_id": material_id,
+                    "source": f"{material_id}_{prefix}_{edge.source}",
+                    "target": f"{material_id}_{prefix}_{edge.target}",
+                    "label": edge.label,
+                    "graph_type": gtype
+                }
+                for edge in graph.edges
+            ]
+            if edge_rows:
+                supabase.table("mind_map_edges").insert(edge_rows).execute()
+
+        # Store Mind Map
+        store_graph(ai_result.mind_map, "mindmap", "mm")
+        # Store Concept Graph
+        store_graph(ai_result.concept_graph, "conceptgraph", "cg")
 
         # 5. Chunk and Embed for RAG
         chunks = pdf_service.chunk_text(text)

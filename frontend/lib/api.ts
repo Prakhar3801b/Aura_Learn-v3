@@ -116,6 +116,10 @@ export async function getMindMap(materialId: string) {
     return fetchAPI<any>(`/ai/mindmap/${materialId}`);
 }
 
+export async function getConceptGraph(materialId: string) {
+    return fetchAPI<any>(`/ai/conceptgraph/${materialId}`);
+}
+
 export async function generatePracticalChallenge(materialId: string) {
     return fetchAPI<any>(`/ai/practical/generate/${materialId}`, { method: 'POST' });
 }

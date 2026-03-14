@@ -112,6 +112,31 @@ Return ONLY valid JSON with this structure:
 Ensure it is a valid bipartite graph. Create 10-20 nodes total."""
 
 
+PRACTICAL_EXERCISE_PROMPT = """You are an expert tutor. Create a practical challenge or scenario based on the following study material. 
+The challenge should test the student's ability to apply the concepts in a real-world context.
+
+Study Material:
+{text}
+
+Return ONLY valid JSON with this structure:
+{{
+  "topic": "...",
+  "challenge": "...",
+  "instructions": "...",
+  "expected_outcome": "..."
+}}"""
+
+PRACTICAL_FEEDBACK_PROMPT = """You are an expert tutor evaluating a student's answer to a practical challenge.
+Challenge: {challenge}
+Student Answer: {answer}
+
+Reference Material:
+{text}
+
+Provide constructive feedback. Mention what they got right, what they missed, and how they can improve.
+Keep the tone encouraging."""
+
+
 class AIService:
     """LLM orchestration using Groq (Llama 3) to generate study outputs."""
 

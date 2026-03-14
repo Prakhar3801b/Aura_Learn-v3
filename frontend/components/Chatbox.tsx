@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useParams } from 'next/navigation';
 import { chatWithMaterial } from '@/lib/api';
 
 interface Message {
@@ -21,6 +22,8 @@ export default function ChatSidebar({
     initialMessage = "Hi! I'm Aura, your AI study assistant. Upload a document and I'll help you master the content!",
     placeholder = "Ask anything..."
 }: ChatSidebarProps) {
+    const params = useParams();
+    const activeMaterialId = materialId || (params?.id as string);
     const [messages, setMessages] = useState<Message[]>([]);
     const [input, setInput] = useState('');
     const [loading, setLoading] = useState(false);
@@ -46,9 +49,9 @@ export default function ChatSidebar({
         setMessages(prev => [...prev, { role: 'user', content: userMsg }]);
         setLoading(true);
 
-        if (materialId) {
+        if (activeMaterialId) {
             try {
-                const res = await chatWithMaterial(materialId, userMsg);
+                const res = await chatWithMaterial(activeMaterialId, userMsg);
                 setMessages(prev => [...prev, {
                     role: 'assistant',
                     content: res.answer,

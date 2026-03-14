@@ -121,9 +121,10 @@ Study Material:
 Return ONLY valid JSON with this structure:
 {{
   "topic": "...",
-  "challenge": "...",
-  "instructions": "...",
-  "expected_outcome": "..."
+  "challenge_type": "Case Study|Simulation|Exercise",
+  "question": "The specific question or task for the student",
+  "instructions": "Supporting details or context",
+  "expected_outcome": "What a perfect answer should cover"
 }}"""
 
 PRACTICAL_FEEDBACK_PROMPT = """You are an expert tutor evaluating a student's answer to a practical challenge.

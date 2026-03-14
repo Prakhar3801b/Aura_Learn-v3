@@ -34,7 +34,8 @@ export default function PracticalWorkshop({ materialId }: PracticalWorkshopProps
         if (!answer.trim()) return;
         setEvaluating(true);
         try {
-            const data = await evaluatePracticalAnswer(materialId, challenge.question, answer);
+            const challengeText = challenge.question || challenge.challenge || challenge.topic || "Practical Challenge";
+            const data = await evaluatePracticalAnswer(materialId, challengeText, answer);
             setFeedback(data.feedback);
         } catch (e) {
             console.error('Evaluation failed:', e);

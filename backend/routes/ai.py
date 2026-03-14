@@ -110,8 +110,8 @@ async def evaluate_practical(material_id: str, request: PracticalEvaluateRequest
     """Evaluate a student's answer to a practical challenge."""
     try:
         text = await rag_service.get_material_text(material_id)
-        feedback = await rag_service.ai_service.evaluate_practical_answer(text, request.challenge, request.answer)
-        return {"feedback": feedback}
+        result = await rag_service.ai_service.evaluate_practical_answer(text, request.challenge, request.answer)
+        return result
     except Exception as e:
         logger.error(f"Practical evaluation failed: {e}")
         raise HTTPException(500, str(e))

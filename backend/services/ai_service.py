@@ -134,7 +134,10 @@ Student Answer: {answer}
 Reference Material:
 {text}
 
-Provide constructive feedback. Mention what they got right, what they missed, and how they can improve.
+Provide a comprehensive response in two parts:
+1. **Model Answer**: Provide a complete, high-quality ideal answer that covers all required points from the reference material.
+2. **Constructive Feedback**: Evaluate the student's specific answer. Mention what they got right, what they missed, and clear steps on how they can improve.
+
 Keep the tone encouraging."""
 
 

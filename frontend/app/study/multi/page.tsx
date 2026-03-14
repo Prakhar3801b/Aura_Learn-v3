@@ -1,6 +1,6 @@
 'use client';
 
-import { use, useEffect, useState, useRef } from 'react';
+import { use, useEffect, useState, useRef, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '@/lib/supabase';
@@ -8,7 +8,7 @@ import { chatMulti, getMaterial } from '@/lib/api';
 import Navbar from '@/components/Navbar';
 import { AuraButton } from '@/components/AuraButton';
 
-export default function MultiStudyPage() {
+function MultiStudyPageContent() {
     const searchParams = useSearchParams();
     const ids = searchParams.get('ids')?.split(',') || [];
     const [materials, setMaterials] = useState<any[]>([]);
@@ -168,5 +168,13 @@ export default function MultiStudyPage() {
 
             </div>
         </div>
+    );
+}
+
+export default function MultiStudyPage() {
+    return (
+        <Suspense fallback={<div style={{ padding: '2rem' }}>Loading Fusion Engine...</div>}>
+            <MultiStudyPageContent />
+        </Suspense>
     );
 }

@@ -1,4 +1,5 @@
 import logging
+from typing import Optional, List
 from fastapi import APIRouter, HTTPException
 from supabase import create_client
 from config import get_settings

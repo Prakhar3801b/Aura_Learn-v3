@@ -29,6 +29,24 @@ def get_supabase():
     return create_client(settings.supabase_url, settings.supabase_service_role_key)
 
 
+def sanitize_filename(filename: str) -> str:
+    """Sanitize filename by removing potentially problematic characters."""
+    import re
+    import unicodedata
+
+    # Normalize unicode characters to replace ones like '🏺' with something safe if possible, 
+    # but here we mostly want to strip/replace them.
+    filename = unicodedata.normalize('NFKD', filename).encode('ascii', 'ignore').decode('ascii')
+    
+    # Remove any character that isn't a word character, dot, or hyphen
+    filename = re.sub(r'[^\w\.\-]', '_', filename)
+    
+    # Remove duplicate underscores
+    filename = re.sub(r'_+', '_', filename)
+    
+    return filename.strip('_')
+
+
 async def process_material_background(
     material_id: str, file_bytes: bytes, file_type: str, filename: str
 ):
@@ -202,7 +220,8 @@ async def upload_material(
         raise HTTPException(400, f"Failed to read uploaded file: {e}")
 
     material_id = str(uuid.uuid4())
-    storage_path = f"{user_id}/{material_id}/{file.filename}"
+    safe_filename = sanitize_filename(file.filename or "unnamed_file")
+    storage_path = f"{user_id}/{material_id}/{safe_filename}"
 
     try:
         # Upload to Supabase Storage

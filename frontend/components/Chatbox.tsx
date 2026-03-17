@@ -49,11 +49,15 @@ export default function Chatbox({ materialId: initialId, materialTitle: initialT
             if (e.detail?.title) setActiveMaterialTitle(e.detail.title);
         };
 
+        const handleToggle = () => setIsCollapsed(prev => !prev);
+
         window.addEventListener('aura-chat-open', handleAutoOpen);
         window.addEventListener('aura-chat-init', handleInit);
+        window.addEventListener('aura-toggle-chat', handleToggle);
         return () => {
             window.removeEventListener('aura-chat-open', handleAutoOpen);
             window.removeEventListener('aura-chat-init', handleInit);
+            window.removeEventListener('aura-toggle-chat', handleToggle);
         };
     }, [activeMaterialTitle]);
 
@@ -106,112 +110,118 @@ export default function Chatbox({ materialId: initialId, materialTitle: initialT
         }
     };
 
-    if (isCollapsed) {
-        return (
-            <div 
-                className="chat-sidebar collapsed"
-                style={{ width: '40px', cursor: 'pointer', background: 'var(--surface)', borderLeft: '1px solid var(--border)', justifyContent: 'center', alignItems: 'center', display: 'flex', height: '100vh', position: 'fixed', right: 0, top: 0, zIndex: 40 }}
-                onClick={() => setIsCollapsed(false)}
-            >
-                <div style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)', fontWeight: 700, color: 'var(--muted)', fontSize: '0.75rem', letterSpacing: '0.1em' }}>
-                    AURA ASSISTANT
-                </div>
-                <div style={{ position: 'absolute', top: '1.25rem', color: 'var(--primary)' }}>✨</div>
-            </div>
-        );
-    }
-
+    // Use a single render path for smoother transitions
     return (
-        <div className="chat-sidebar">
-            {/* Header */}
-            <div style={{
-                padding: '1.25rem',
-                borderBottom: '1px solid var(--border)',
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                background: 'var(--card-gradient)'
-            }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-                    <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#34A853' }}></div>
-                    <span style={{ fontWeight: 700, fontSize: '0.9rem', color: 'var(--text)' }}>Aura Assistant</span>
-                </div>
-                <button
-                    onClick={() => setIsCollapsed(true)}
-                    style={{
-                        background: 'transparent', border: 'none', color: 'var(--muted)',
-                        cursor: 'pointer', fontSize: '1.2rem', padding: '0.2rem'
-                    }}
-                >
-                    −
-                </button>
-            </div>
-
-            {/* Messages */}
-            <div ref={scrollRef} className="chat-messages" style={{ flex: 1, overflowY: 'auto', padding: '1rem' }}>
-                {messages.map((msg, i) => (
-                    <motion.div
-                        key={i}
-                        initial={{ opacity: 0, y: 8 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className={`chat-msg ${msg.role}`}
+        <>
+            {/* Toggle Handle - Visible only when collapsed */}
+            <AnimatePresence>
+                {isCollapsed && (
+                    <motion.div 
+                        initial={{ x: 20, opacity: 0 }}
+                        animate={{ x: 0, opacity: 1 }}
+                        exit={{ x: 20, opacity: 0 }}
+                        className="chat-sidebar-handle"
+                        onClick={() => setIsCollapsed(false)}
                     >
-                        {msg.content}
-                        {msg.sources && msg.sources.length > 0 && (
-                            <div style={{
-                                marginTop: '0.4rem',
-                                fontSize: '0.7rem',
-                                color: 'var(--muted)',
-                                borderTop: '1px solid var(--border)',
-                                paddingTop: '0.35rem',
-                                opacity: 0.8
-                            }}>
-                                📍 Found in {msg.sources.length} sections
-                            </div>
-                        )}
-                    </motion.div>
-                ))}
-                {loading && (
-                    <div className="chat-msg assistant">
-                        <div style={{ display: 'flex', gap: '0.3rem' }}>
-                            {[0, 1, 2].map(i => (
-                                <motion.div
-                                    key={i}
-                                    animate={{ opacity: [0.3, 1, 0.3] }}
-                                    transition={{ repeat: Infinity, duration: 1.2, delay: i * 0.2 }}
-                                    style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--muted)' }}
-                                />
-                            ))}
+                        <div style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)', fontWeight: 700, color: 'var(--muted)', fontSize: '0.65rem', letterSpacing: '0.1em', marginTop: '1rem' }}>
+                            AURA ASSISTANT
                         </div>
-                    </div>
+                        <div style={{ position: 'absolute', top: '0.8rem', color: 'var(--primary)', fontSize: '1.1rem' }}>✨</div>
+                    </motion.div>
                 )}
-            </div>
+            </AnimatePresence>
 
-            {/* Input Overlay */}
-            <div className="chat-input-area" style={{ padding: '1rem', borderTop: '1px solid var(--border)' }}>
-                <div className="chat-input-wrapper" style={{ display: 'flex', gap: '0.5rem', background: 'var(--input-bg)', padding: '0.5rem 0.75rem', border: '1px solid var(--border)', borderRadius: '12px' }}>
-                    <input
-                        className="chat-input"
-                        style={{ flex: 1, border: 'none', background: 'transparent', outline: 'none', color: 'var(--text)', fontSize: '0.9rem' }}
-                        value={input}
-                        onChange={(e) => setInput(e.target.value)}
-                        onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-                        placeholder="Ask Aura anything..."
-                        disabled={loading}
-                    />
+            <div className={`chat-sidebar ${isCollapsed ? 'collapsed' : ''}`}>
+                {/* Header */}
+                <div style={{
+                    padding: '1.25rem',
+                    borderBottom: '1px solid var(--border)',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    background: 'var(--card-gradient)'
+                }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                        <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#34A853' }}></div>
+                        <span style={{ fontWeight: 700, fontSize: '0.9rem', color: 'var(--text)' }}>Aura Assistant</span>
+                    </div>
                     <button
-                        onClick={handleSend}
-                        disabled={!input.trim() || loading}
-                        style={{ 
-                            background: 'var(--primary)', color: 'white', border: 'none', 
-                            borderRadius: '8px', padding: '0.4rem 0.8rem', cursor: 'pointer',
-                            opacity: input.trim() ? 1 : 0.4
+                        onClick={() => setIsCollapsed(true)}
+                        style={{
+                            background: 'transparent', border: 'none', color: 'var(--muted)',
+                            cursor: 'pointer', fontSize: '1.2rem', padding: '0.2rem'
                         }}
                     >
-                        ➔
+                        −
                     </button>
                 </div>
+
+                {/* Messages */}
+                <div ref={scrollRef} className="chat-messages" style={{ flex: 1, overflowY: 'auto', padding: '1rem' }}>
+                    {messages.map((msg, i) => (
+                        <motion.div
+                            key={i}
+                            initial={{ opacity: 0, y: 8 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className={`chat-msg ${msg.role}`}
+                        >
+                            {msg.content}
+                            {msg.sources && msg.sources.length > 0 && (
+                                <div style={{
+                                    marginTop: '0.4rem',
+                                    fontSize: '0.7rem',
+                                    color: 'var(--muted)',
+                                    borderTop: '1px solid var(--border)',
+                                    paddingTop: '0.35rem',
+                                    opacity: 0.8
+                                }}>
+                                    📍 Found in {msg.sources.length} sections
+                                </div>
+                            )}
+                        </motion.div>
+                    ))}
+                    {loading && (
+                        <div className="chat-msg assistant">
+                            <div style={{ display: 'flex', gap: '0.3rem' }}>
+                                {[0, 1, 2].map(i => (
+                                    <motion.div
+                                        key={i}
+                                        animate={{ opacity: [0.3, 1, 0.3] }}
+                                        transition={{ repeat: Infinity, duration: 1.2, delay: i * 0.2 }}
+                                        style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--muted)' }}
+                                    />
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                </div>
+
+                {/* Input Overlay */}
+                <div className="chat-input-area" style={{ padding: '1rem', borderTop: '1px solid var(--border)' }}>
+                    <div className="chat-input-wrapper" style={{ display: 'flex', gap: '0.5rem', background: 'var(--input-bg)', padding: '0.5rem 0.75rem', border: '1px solid var(--border)', borderRadius: '12px' }}>
+                        <input
+                            className="chat-input"
+                            style={{ flex: 1, border: 'none', background: 'transparent', outline: 'none', color: 'var(--text)', fontSize: '0.9rem' }}
+                            value={input}
+                            onChange={(e) => setInput(e.target.value)}
+                            onKeyDown={(e) => e.key === 'Enter' && handleSend()}
+                            placeholder="Ask Aura anything..."
+                            disabled={loading}
+                        />
+                        <button
+                            onClick={handleSend}
+                            disabled={!input.trim() || loading}
+                            style={{ 
+                                background: 'var(--primary)', color: 'white', border: 'none', 
+                                borderRadius: '8px', padding: '0.4rem 0.8rem', cursor: 'pointer',
+                                opacity: input.trim() ? 1 : 0.4
+                            }}
+                        >
+                            ➔
+                        </button>
+                    </div>
+                </div>
             </div>
-        </div>
+        </>
     );
 }

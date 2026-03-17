@@ -13,6 +13,8 @@ from services.ai_service import AIService
 from services.embedding_service import EmbeddingService
 from models.material import MaterialUploadResponse, ProcessingStatus, FileType
 from datetime import datetime
+from pydantic import BaseModel
+from typing import List, Optional
 
 router = APIRouter(prefix="/materials", tags=["Materials"])
 logger = logging.getLogger(__name__)
@@ -307,7 +309,7 @@ class BatchDeleteRequest(BaseModel):
     material_ids: List[str]
     user_id: str
 
-@router.request("DELETE", "/batch")
+@router.delete("/batch")
 async def delete_materials_batch(request: BatchDeleteRequest):
     """Batch delete study materials."""
     supabase = get_supabase()

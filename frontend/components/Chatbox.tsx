@@ -11,30 +11,57 @@ interface Message {
 }
 
 interface ChatboxProps {
-    materialId: string;
-    materialTitle: string;
+    materialId?: string;
+    materialTitle?: string;
 }
 
-export default function Chatbox({ materialId, materialTitle }: ChatboxProps) {
+export default function Chatbox({ materialId: initialId, materialTitle: initialTitle }: ChatboxProps) {
     const [messages, setMessages] = useState<Message[]>([]);
     const [input, setInput] = useState('');
     const [loading, setLoading] = useState(false);
-    const [isCollapsed, setIsCollapsed] = useState(false);
+    const [isCollapsed, setIsCollapsed] = useState(true);
+    const [activeMaterialId, setActiveMaterialId] = useState<string | undefined>(initialId);
+    const [activeMaterialTitle, setActiveMaterialTitle] = useState<string | undefined>(initialTitle);
     const scrollRef = useRef<HTMLDivElement>(null);
 
-    // Initial message and auto-open listener
+    // Initial message and event listeners
     useEffect(() => {
-        setMessages([
-            { role: 'assistant', content: `Hi! I'm Aura, your assistant for **${materialTitle}**. Ask me anything about this material!` }
-        ]);
+        if (activeMaterialTitle) {
+            setMessages([
+                { role: 'assistant', content: `Hi! I'm Aura, your assistant for **${activeMaterialTitle}**. Ask me anything about this material!` }
+            ]);
+        } else {
+            setMessages([
+                { role: 'assistant', content: "Hi! I'm Aura. Upload a study material and I'll help you master the content!" }
+            ]);
+        }
 
-        const handleAutoOpen = () => {
+        const handleAutoOpen = (e: any) => {
             setIsCollapsed(false);
+            if (e.detail?.id && e.detail?.title) {
+                setActiveMaterialId(e.detail.id);
+                setActiveMaterialTitle(e.detail.title);
+            }
+        };
+
+        const handleInit = (e: any) => {
+            if (e.detail?.id) setActiveMaterialId(e.detail.id);
+            if (e.detail?.title) setActiveMaterialTitle(e.detail.title);
         };
 
         window.addEventListener('aura-chat-open', handleAutoOpen);
-        return () => window.removeEventListener('aura-chat-open', handleAutoOpen);
-    }, [materialTitle]);
+        window.addEventListener('aura-chat-init', handleInit);
+        return () => {
+            window.removeEventListener('aura-chat-open', handleAutoOpen);
+            window.removeEventListener('aura-chat-init', handleInit);
+        };
+    }, [activeMaterialTitle]);
+
+    // Handle updates if initial props change (though in RootLayout they won't)
+    useEffect(() => {
+        if (initialId) setActiveMaterialId(initialId);
+        if (initialTitle) setActiveMaterialTitle(initialTitle);
+    }, [initialId, initialTitle]);
 
     const scrollToBottom = () => {
         if (scrollRef.current) {
@@ -56,7 +83,13 @@ export default function Chatbox({ materialId, materialTitle }: ChatboxProps) {
 
         try {
             // chatWithMaterial takes (materialId, query)
-            const res = await chatWithMaterial(materialId, userMsg);
+            const idToUse = activeMaterialId || '';
+            if (!idToUse) {
+                setMessages(prev => [...prev, { role: 'assistant', content: "Please select a study material first!" }]);
+                setLoading(false);
+                return;
+            }
+            const res = await chatWithMaterial(idToUse, userMsg);
             setMessages(prev => [...prev, {
                 role: 'assistant',
                 content: res.answer,

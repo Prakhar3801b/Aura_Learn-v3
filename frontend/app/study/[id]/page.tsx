@@ -80,12 +80,19 @@ export default function StudyPage({ params }: { params: Promise<{ id: string }> 
 
     useEffect(() => {
         if (!loading && material) {
+            // Initialize chat with material data
+            window.dispatchEvent(new CustomEvent('aura-chat-init', {
+                detail: { id: id, title: material.title }
+            }));
+
             // Trigger aura-chat-open event for the automated pop-out
             setTimeout(() => {
-                window.dispatchEvent(new CustomEvent('aura-chat-open'));
+                window.dispatchEvent(new CustomEvent('aura-chat-open', {
+                    detail: { id: id, title: material.title }
+                }));
             }, 800);
         }
-    }, [loading, material]);
+    }, [loading, material, id]);
 
     useEffect(() => {
         async function checkStatus() {

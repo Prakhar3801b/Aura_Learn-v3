@@ -142,6 +142,20 @@ async def evaluate_practical(material_id: str, request: PracticalEvaluateRequest
         logger.error(f"Practical evaluation failed: {e}")
         raise HTTPException(500, str(e))
 
+
+@router.post("/simulation/generate/{material_id}")
+async def generate_simulation(material_id: str):
+    """Generate a step-by-step visual simulation from study material."""
+    try:
+        text = await rag_service.get_material_text(material_id)
+        if not text:
+            raise HTTPException(404, "No content found for this material")
+        simulation = rag_service.ai_service.generate_simulation(text, material_id)
+        return simulation
+    except Exception as e:
+        logger.error(f"Simulation generation failed: {e}")
+        raise HTTPException(500, str(e))
+
 class ChatRequest(BaseModel):
     question: str
     user_id: Optional[str] = None

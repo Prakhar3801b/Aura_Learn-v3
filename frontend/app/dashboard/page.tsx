@@ -1,10 +1,10 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
-import { getUserMaterials } from '@/lib/api';
+import { getUserMaterials, deleteMaterial } from '@/lib/api';
 import { AuraButton } from '@/components/AuraButton';
 
 const fileTypeIcon: Record<string, string> = { pdf: '📄', image: '🖼️', video: '🎬' };
@@ -21,6 +21,8 @@ export default function DashboardPage() {
     const [loading, setLoading] = useState(true);
     const [selectedIds, setSelectedIds] = useState<string[]>([]);
     const [fusionMode, setFusionMode] = useState(false);
+    const [deleteTarget, setDeleteTarget] = useState<any>(null);
+    const [deleting, setDeleting] = useState(false);
 
     useEffect(() => {
         supabase.auth.getUser().then(({ data }) => {
@@ -58,6 +60,20 @@ export default function DashboardPage() {
         window.location.href = `/study/multi?ids=${ids}`;
     };
 
+    const handleDelete = async () => {
+        if (!deleteTarget || !user) return;
+        setDeleting(true);
+        try {
+            await deleteMaterial(deleteTarget.id, user.id);
+            setMaterials(prev => prev.filter(m => m.id !== deleteTarget.id));
+            setDeleteTarget(null);
+        } catch (e) {
+            console.error('Delete failed:', e);
+        } finally {
+            setDeleting(false);
+        }
+    };
+
     return (
         <div style={{ minHeight: '100vh', padding: '2.5rem' }}>
             <div style={{ maxWidth: '1000px' }}>
@@ -66,10 +82,10 @@ export default function DashboardPage() {
                 <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} style={{ marginBottom: '2rem' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                         <div>
-                            <h1 style={{ fontSize: '1.8rem', fontWeight: 800, color: '#1A1A2E' }}>
+                            <h1 style={{ fontSize: '1.8rem', fontWeight: 800, color: 'var(--text)' }}>
                                 {greeting()}, {user?.user_metadata?.full_name?.split(' ')[0] || 'Learner'} 👋
                             </h1>
-                            <p style={{ color: '#7C7C8A', marginTop: '0.3rem', fontSize: '0.9rem' }}>
+                            <p style={{ color: 'var(--muted)', marginTop: '0.3rem', fontSize: '0.9rem' }}>
                                 Your AI study dashboard — everything in one place.
                             </p>
                         </div>
@@ -98,9 +114,9 @@ export default function DashboardPage() {
                 {/* Quick Actions */}
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginBottom: '2.5rem' }}>
                     {[
-                        { icon: '⬆️', label: 'Upload Material', href: '/upload', bg: '#D5E8F5' },
-                        { icon: '🥽', label: 'AR Labs', href: '/ar-labs', bg: '#E8D5F5' },
-                        { icon: '⚡', label: 'Study Now', href: materials[0] ? `/study/${materials[0].id}` : '/upload', bg: '#D4F5E9' },
+                        { icon: '⬆️', label: 'Upload Material', href: '/upload', bg: 'var(--pastel-sky)' },
+                        { icon: '🥽', label: 'AR Labs', href: '/ar-labs', bg: 'var(--pastel-lavender)' },
+                        { icon: '⚡', label: 'Study Now', href: materials[0] ? `/study/${materials[0].id}` : '/upload', bg: 'var(--pastel-mint)' },
                     ].map((a, i) => (
                         <motion.div key={a.label} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.08 }}>
                             <Link href={a.href} style={{ textDecoration: 'none' }}>
@@ -120,7 +136,7 @@ export default function DashboardPage() {
                                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                                         fontSize: '1.2rem',
                                     }}>{a.icon}</div>
-                                    <span style={{ fontWeight: 600, color: '#1A1A2E', fontSize: '0.9rem' }}>{a.label}</span>
+                                    <span style={{ fontWeight: 600, color: 'var(--text)', fontSize: '0.9rem' }}>{a.label}</span>
                                 </div>
                             </Link>
                         </motion.div>
@@ -128,7 +144,7 @@ export default function DashboardPage() {
                 </div>
 
                 {/* Materials */}
-                <h2 style={{ fontFamily: 'Outfit', fontWeight: 700, fontSize: '1.2rem', color: '#1A1A2E', marginBottom: '1rem' }}>
+                <h2 style={{ fontFamily: 'Outfit', fontWeight: 700, fontSize: '1.2rem', color: 'var(--text)', marginBottom: '1rem' }}>
                     {fusionMode ? 'Select Materials for Fusion' : 'Your Study Materials'}
                 </h2>
 
@@ -141,8 +157,8 @@ export default function DashboardPage() {
                 ) : materials.length === 0 ? (
                     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="card" style={{ padding: '3rem', textAlign: 'center' }}>
                         <div style={{ fontSize: '3rem', marginBottom: '0.75rem' }}>📚</div>
-                        <h3 style={{ fontFamily: 'Outfit', fontWeight: 700, color: '#1A1A2E', marginBottom: '0.4rem' }}>No materials yet</h3>
-                        <p style={{ color: '#7C7C8A', marginBottom: '1.25rem', fontSize: '0.9rem' }}>Upload your first PDF, image, or video to get started</p>
+                        <h3 style={{ fontFamily: 'Outfit', fontWeight: 700, color: 'var(--text)', marginBottom: '0.4rem' }}>No materials yet</h3>
+                        <p style={{ color: 'var(--muted)', marginBottom: '1.25rem', fontSize: '0.9rem' }}>Upload your first PDF, image, or video to get started</p>
                         <Link href="/upload" style={{ textDecoration: 'none' }}>
                             <AuraButton variant="primary">Upload Now →</AuraButton>
                         </Link>
@@ -154,6 +170,7 @@ export default function DashboardPage() {
                                 <div
                                     onClick={(e) => toggleSelection(mat.id, e)}
                                     style={{ position: 'relative' }}
+                                    className="material-card-wrapper"
                                 >
                                     <Link href={fusionMode ? '#' : `/study/${mat.id}`} style={{ textDecoration: 'none' }}>
                                         <div
@@ -161,15 +178,15 @@ export default function DashboardPage() {
                                             style={{
                                                 padding: '1.25rem',
                                                 cursor: 'pointer',
-                                                border: selectedIds.includes(mat.id) ? '2px solid #7C3AED' : '1px solid #E8E2DA',
-                                                background: selectedIds.includes(mat.id) ? '#F8F9FF' : '#FFFFFF'
+                                                border: selectedIds.includes(mat.id) ? '2px solid #7C3AED' : '1px solid var(--border)',
+                                                background: selectedIds.includes(mat.id) ? 'rgba(124, 58, 237, 0.05)' : 'var(--card)'
                                             }}
                                         >
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.7rem', marginBottom: '0.6rem' }}>
                                                 <span style={{ fontSize: '1.3rem' }}>{fileTypeIcon[mat.file_type] || '📄'}</span>
                                                 <div style={{ flex: 1, minWidth: 0 }}>
-                                                    <div style={{ fontWeight: 600, color: '#1A1A2E', fontSize: '0.9rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{mat.title}</div>
-                                                    <div style={{ color: '#7C7C8A', fontSize: '0.72rem', textTransform: 'capitalize', fontFamily: "'JetBrains Mono', monospace" }}>{mat.file_type}</div>
+                                                    <div style={{ fontWeight: 600, color: 'var(--text)', fontSize: '0.9rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{mat.title}</div>
+                                                    <div style={{ color: 'var(--muted)', fontSize: '0.72rem', textTransform: 'capitalize', fontFamily: "'JetBrains Mono', monospace" }}>{mat.file_type}</div>
                                                 </div>
                                                 {fusionMode && mat.status === 'completed' && (
                                                     <div style={{
@@ -185,8 +202,8 @@ export default function DashboardPage() {
                                             </div>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                                                 <span style={{
-                                                    background: statusBg[mat.status] || '#F3F0EB',
-                                                    color: statusColor[mat.status] || '#7C7C8A',
+                                                    background: statusBg[mat.status] || 'var(--input-bg)',
+                                                    color: statusColor[mat.status] || 'var(--muted)',
                                                     fontSize: '0.68rem',
                                                     fontWeight: 600,
                                                     fontFamily: "'JetBrains Mono', monospace",
@@ -197,12 +214,110 @@ export default function DashboardPage() {
                                             </div>
                                         </div>
                                     </Link>
+                                    {/* Delete ✕ button */}
+                                    {!fusionMode && (
+                                        <button
+                                            onClick={(e) => { e.preventDefault(); e.stopPropagation(); setDeleteTarget(mat); }}
+                                            className="delete-x-btn"
+                                            style={{
+                                                position: 'absolute',
+                                                top: '0.6rem',
+                                                right: '0.6rem',
+                                                width: '26px',
+                                                height: '26px',
+                                                borderRadius: '50%',
+                                                border: '1px solid var(--border)',
+                                                background: 'var(--surface)',
+                                                color: 'var(--muted)',
+                                                cursor: 'pointer',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                fontSize: '0.75rem',
+                                                fontWeight: 700,
+                                                opacity: 0,
+                                                transition: 'all 0.2s ease',
+                                                zIndex: 5,
+                                            }}
+                                            aria-label="Delete material"
+                                        >
+                                            ✕
+                                        </button>
+                                    )}
                                 </div>
                             </motion.div>
                         ))}
                     </div>
                 )}
             </div>
+
+            {/* Delete Confirmation Modal */}
+            <AnimatePresence>
+                {deleteTarget && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        style={{
+                            position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            zIndex: 999,
+                        }}
+                        onClick={() => !deleting && setDeleteTarget(null)}
+                    >
+                        <motion.div
+                            initial={{ scale: 0.9, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0.9, opacity: 0 }}
+                            onClick={(e) => e.stopPropagation()}
+                            style={{
+                                background: 'var(--surface)',
+                                borderRadius: '20px',
+                                padding: '2rem',
+                                maxWidth: '400px',
+                                width: '90%',
+                                boxShadow: '0 20px 60px rgba(0,0,0,0.15)',
+                                textAlign: 'center',
+                            }}
+                        >
+                            <div style={{ fontSize: '2.5rem', marginBottom: '0.75rem' }}>⚠️</div>
+                            <h3 style={{ fontFamily: 'Outfit', fontWeight: 700, fontSize: '1.15rem', color: 'var(--text)', marginBottom: '0.5rem' }}>
+                                Delete &ldquo;{deleteTarget.title}&rdquo;?
+                            </h3>
+                            <p style={{ color: 'var(--muted)', fontSize: '0.85rem', lineHeight: 1.6, marginBottom: '1.5rem' }}>
+                                This will permanently remove this material and all its flashcards, mind maps, exam points, and study data. This action cannot be undone.
+                            </p>
+                            <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center' }}>
+                                <AuraButton
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => setDeleteTarget(null)}
+                                >
+                                    Cancel
+                                </AuraButton>
+                                <button
+                                    onClick={handleDelete}
+                                    disabled={deleting}
+                                    style={{
+                                        background: '#EA4335',
+                                        color: 'white',
+                                        border: 'none',
+                                        borderRadius: '10px',
+                                        padding: '0.5rem 1.25rem',
+                                        fontWeight: 600,
+                                        fontSize: '0.85rem',
+                                        cursor: deleting ? 'not-allowed' : 'pointer',
+                                        opacity: deleting ? 0.6 : 1,
+                                        fontFamily: "'Inter', sans-serif",
+                                    }}
+                                >
+                                    {deleting ? 'Deleting...' : 'Delete'}
+                                </button>
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div>
     );
 }

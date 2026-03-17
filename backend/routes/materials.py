@@ -277,3 +277,35 @@ async def list_user_materials(user_id: str):
         .execute()
     )
     return result.data or []
+
+
+@router.delete("/{material_id}")
+async def delete_material(material_id: str, user_id: str):
+    """Delete a study material and all its related data (cascades in DB)."""
+    supabase = get_supabase()
+
+    # 1. Verify the material exists and belongs to the user
+    result = supabase.table("study_materials").select("*").eq("id", material_id).single().execute()
+    if not result.data:
+        raise HTTPException(404, "Material not found")
+    if result.data.get("user_id") != user_id:
+        raise HTTPException(403, "You can only delete your own materials")
+
+    # 2. Delete from Supabase Storage
+    file_url = result.data.get("file_url", "")
+    try:
+        # Extract storage path from public URL
+        # URL format: .../storage/v1/object/public/study-materials/{user_id}/{material_id}/{filename}
+        if "study-materials/" in file_url:
+            storage_path = file_url.split("study-materials/")[1]
+            supabase.storage.from_("study-materials").remove([storage_path])
+            logger.info(f"Deleted storage file: {storage_path}")
+    except Exception as e:
+        logger.warning(f"Storage deletion failed (continuing): {e}")
+
+    # 3. Delete DB row (ON DELETE CASCADE handles flashcards, exam_points, mind_map, chunks, sessions)
+    supabase.table("study_materials").delete().eq("id", material_id).execute()
+    logger.info(f"Material {material_id} deleted by user {user_id}")
+
+    return {"deleted": True, "material_id": material_id}
+

@@ -127,18 +127,34 @@ Return ONLY valid JSON with this structure:
   "expected_outcome": "What a perfect answer should cover"
 }}"""
 
-PRACTICAL_FEEDBACK_PROMPT = """You are an expert tutor evaluating a student's answer to a practical challenge.
-Challenge: {challenge}
-Student Answer: {answer}
+SIMULATION_PROMPT = """You are an expert educational visualizer. Analyze the following study material and identify a core concept that can be explained through a step-by-step visual simulation.
 
-Reference Material:
+Study Material:
 {text}
 
-Provide a comprehensive response in two parts:
-1. **Model Answer**: Provide a complete, high-quality ideal answer that covers all required points from the reference material.
-2. **Constructive Feedback**: Evaluate the student's specific answer. Mention what they got right, what they missed, and clear steps on how they can improve.
+Generate a structured JSON simulation. The simulation should be applicable to the subject (e.g., an algorithm for CS, a process for Science, a timeline for History, etc.).
 
-Keep the tone encouraging."""
+Return ONLY valid JSON with this exact structure:
+{{
+  "title": "Simulation Title",
+  "subject_area": "Subject (e.g. Computer Science, Biology)",
+  "description": "Brief explanation of what is being simulated",
+  "visual_type": "array|graph|tree|process_flow|timeline|comparison|cycle|formula",
+  "steps": [
+    {{
+      "step_number": 1,
+      "narration": "What is happening in this step",
+      "elements": [
+        {{ "id": "e1", "label": "Value/Label", "state": "default|highlighted|active|completed|error" }}
+      ],
+      "annotations": [
+        {{ "text": "Supporting text/data", "position": "top|bottom" }}
+      ]
+    }}
+  ]
+}}
+
+Create 5-10 logical steps that clearly demonstrate the concept."""
 
 
 class AIService:
@@ -161,6 +177,12 @@ class AIService:
         except Exception as e:
             logger.error(f"Groq API call failed: {e}")
             raise
+
+    def generate_simulation(self, text: str, material_id: str) -> Dict[str, Any]:
+        """Generate a visual simulation from study text."""
+        prompt = SIMULATION_PROMPT.format(text=text[:8000])
+        raw = self._chat(prompt)
+        return self._safe_json_parse(raw)
 
     def _safe_json_parse(self, text: str) -> Any:
         """Extract and parse JSON from model response, handling potential text artifacts."""

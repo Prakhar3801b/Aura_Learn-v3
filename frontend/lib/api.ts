@@ -98,6 +98,18 @@ export async function getUserMaterials(userId: string): Promise<Material[]> {
     return fetchAPI<Material[]>(`/materials/user/${userId}`);
 }
 
+export async function deleteMaterial(materialId: string, userId: string) {
+    return fetchAPI<{ deleted: boolean }>(`/materials/${materialId}?user_id=${userId}`, { method: 'DELETE' });
+}
+
+export async function generateSimulation(materialId: string) {
+    return fetchAPI<any>(`/ai/simulation/generate/${materialId}`, { method: 'POST' }, 60000);
+}
+
+export async function getUserSessionHistory(userId: string) {
+    return fetchAPI<any[]>(`/analytics/user/${userId}/history`);
+}
+
 // ── AI Results ────────────────────────────────
 
 export async function getFlashcards(materialId: string) {

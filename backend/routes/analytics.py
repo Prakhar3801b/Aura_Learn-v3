@@ -88,3 +88,48 @@ async def resolve_anomaly(anomaly_id: str):
     supabase = get_supabase()
     supabase.table("anomaly_flags").update({"resolved": True}).eq("id", anomaly_id).execute()
     return {"resolved": True}
+
+
+@router.get("/user/{user_id}/history")
+async def get_user_history(user_id: str):
+    """Get the full study history for a user, grouped by session."""
+    supabase = get_supabase()
+    
+    # 1. Fetch study sessions joined with material titles
+    sessions_res = (
+        supabase.table("study_sessions")
+        .select("*, study_materials(title, file_type)")
+        .eq("user_id", user_id)
+        .order("started_at", desc=True)
+        .execute()
+    )
+    
+    sessions_data = sessions_res.data or []
+    
+    # 2. Enrich with stuck topics from anomalies
+    history = []
+    for s in sessions_data:
+        # Handle the joined data structure
+        material = s.get("study_materials", {})
+        if isinstance(material, dict):
+            s["material_title"] = material.get("title", "Untitled Material")
+            s["file_type"] = material.get("file_type", "pdf")
+        else:
+            s["material_title"] = "Untitled Material"
+            s["file_type"] = "pdf"
+            
+        # Optional: remove the nested object for a cleaner API response
+        if "study_materials" in s:
+            del s["study_materials"]
+            
+        # Fetch associated anomalies to show "stuck topics"
+        anom_res = (
+            supabase.table("anomaly_flags")
+            .select("topic")
+            .eq("session_id", s["id"])
+            .execute()
+        )
+        s["stuck_topics"] = list(set([a["topic"] for a in anom_res.data if a.get("topic")]))
+        history.append(s)
+        
+    return history

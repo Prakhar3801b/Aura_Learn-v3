@@ -6,18 +6,22 @@ import { generateSimulation } from '@/lib/api';
 import { AuraButton } from './AuraButton';
 
 interface SimulationStep {
-    step_number: number;
+    step_title: string;
     narration: string;
-    elements: Array<{ id: string; label: string; state: string }>;
-    annotations: Array<{ text: string; position: 'top' | 'bottom' }>;
+    elements_to_highlight?: string[];
+    animation_type?: string;
 }
 
 interface SimulationData {
     title: string;
-    subject_area: string;
-    description: string;
-    visual_type: string;
+    concept_summary: string;
+    visual_structure: {
+        type: string;
+        elements: Array<{ id: string; label: string; [key: string]: any }>;
+    };
     steps: SimulationStep[];
+    controls: string[];
+    domain: string;
 }
 
 export default function SimulationPlayer({ materialId }: { materialId: string }) {
@@ -67,71 +71,47 @@ export default function SimulationPlayer({ materialId }: { materialId: string })
     const isLast = currentStep === data.steps.length - 1;
 
     const renderVisual = () => {
-        const visualType = data.visual_type;
+        const { type, elements } = data.visual_structure;
+        const highlightedIds = step.elements_to_highlight || [];
         
-        switch (visualType) {
-            case 'array':
-            case 'comparison':
-                return (
-                    <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', justifyContent: 'center' }}>
-                        {step.elements.map((el) => (
-                            <motion.div
-                                key={`${el.id}-${currentStep}`}
-                                layoutId={el.id}
-                                className={`sim-element-box ${el.state}`}
-                            >
-                                {el.label}
-                            </motion.div>
-                        ))}
-                    </div>
-                );
-            case 'graph':
-            case 'tree':
-            case 'process_flow':
-            case 'cycle':
-            case 'timeline':
-                const isCircle = visualType === 'graph' || visualType === 'cycle';
-                return (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', alignItems: 'center', width: '100%' }}>
-                        <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap', justifyContent: 'center', padding: '1rem' }}>
-                            {step.elements.map((el, i) => (
-                                <div key={el.id} style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-                                    <motion.div
-                                        initial={{ scale: 0.8, opacity: 0 }}
-                                        animate={{ scale: 1, opacity: 1 }}
-                                        className={`sim-element-box ${el.state}`}
-                                        style={{ 
-                                            borderRadius: isCircle ? '50%' : '10px',
-                                            zIndex: 2
-                                        }}
-                                    >
-                                        {el.label}
-                                    </motion.div>
-                                    {i < step.elements.length - 1 && visualType !== 'graph' && (
-                                        <div style={{ 
-                                            width: '1.5rem', 
-                                            height: '2px', 
-                                            background: 'var(--border)', 
-                                            margin: '0 -0.5rem',
-                                            zIndex: 1
-                                        }} />
-                                    )}
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                );
-            default:
-                return (
-                    <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', justifyContent: 'center' }}>
-                        {step.elements.map((el) => (
-                            <motion.div key={el.id} className={`sim-element-box ${el.state}`}>
-                                {el.label}
-                            </motion.div>
-                        ))}
-                    </div>
-                );
-        }
+        return (
+            <div style={{ 
+                display: 'flex', 
+                gap: '1rem', 
+                flexWrap: 'wrap', 
+                justifyContent: 'center',
+                alignItems: 'center',
+                minHeight: '200px'
+            }}>
+                {elements.map((el) => {
+                    const isHighlighted = highlightedIds.includes(el.id);
+                    return (
+                        <motion.div
+                            key={el.id}
+                            layout
+                            animate={{
+                                scale: isHighlighted ? 1.1 : 1,
+                                boxShadow: isHighlighted ? '0 0 20px rgba(124, 58, 237, 0.4)' : '0 2px 8px rgba(0,0,0,0.05)',
+                                borderColor: isHighlighted ? 'var(--primary)' : 'var(--border)',
+                                borderStyle: isHighlighted ? 'solid' : 'dashed',
+                            }}
+                            className={`sim-element-box ${isHighlighted ? 'active' : ''}`}
+                            style={{
+                                padding: '0.75rem 1.25rem',
+                                borderRadius: type === 'molecular' || type === 'graph' ? '50%' : '10px',
+                                background: isHighlighted ? 'var(--pastel-sky)' : 'var(--surface)',
+                                color: 'var(--text)',
+                                fontWeight: 700,
+                                border: '1px solid var(--border)',
+                                fontSize: '0.85rem'
+                            }}
+                        >
+                            {el.label}
+                        </motion.div>
+                    );
+                })}
+            </div>
+        );
     };
 
     return (
@@ -140,7 +120,7 @@ export default function SimulationPlayer({ materialId }: { materialId: string })
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <div>
                         <span className="tag-badge" style={{ marginBottom: '0.5rem', background: 'var(--pastel-sky)', color: 'var(--primary)' }}>
-                            {data.subject_area || 'General'}
+                            {data.domain || 'General Learning'}
                         </span>
                         <h2 style={{ fontFamily: 'Outfit', fontWeight: 800, color: 'var(--text)', fontSize: '1.4rem' }}>{data.title}</h2>
                     </div>
@@ -148,7 +128,7 @@ export default function SimulationPlayer({ materialId }: { materialId: string })
                         STEP {currentStep + 1} / {data.steps.length}
                     </div>
                 </div>
-                <p style={{ color: 'var(--muted)', fontSize: '0.9rem', marginTop: '0.3rem' }}>{data.description}</p>
+                <p style={{ color: 'var(--muted)', fontSize: '0.9rem', marginTop: '0.3rem' }}>{data.concept_summary}</p>
             </div>
 
             <div className="sim-canvas">
@@ -162,22 +142,17 @@ export default function SimulationPlayer({ materialId }: { materialId: string })
                         style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}
                     >
                         {renderVisual()}
-                        
-                        {step.annotations && step.annotations.length > 0 && (
-                            <div className="sim-annotation">
-                                {step.annotations.map((ann, i) => (
-                                    <div key={i}>{ann.text}</div>
-                                ))}
-                            </div>
-                        )}
                     </motion.div>
                 </AnimatePresence>
             </div>
 
             <div className="sim-narration">
                 <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}>
-                    <div style={{ fontSize: '1.2rem' }}>🎙️</div>
-                    <div style={{ flex: 1, fontWeight: 500 }}>{step.narration}</div>
+                    <div style={{ fontSize: '1.2rem' }}>💡</div>
+                    <div style={{ flex: 1 }}>
+                        <div style={{ fontWeight: 800, fontSize: '0.75rem', color: 'var(--primary)', textTransform: 'uppercase', marginBottom: '0.2rem' }}>{step.step_title}</div>
+                        <div style={{ fontWeight: 500, lineHeight: 1.6 }}>{step.narration}</div>
+                    </div>
                 </div>
             </div>
 
@@ -199,7 +174,7 @@ export default function SimulationPlayer({ materialId }: { materialId: string })
                     <button 
                         onClick={() => setCurrentStep(prev => Math.min(data.steps.length - 1, prev + 1))} 
                         disabled={isLast} 
-                        style={{ background: 'var(--primary)', color: 'var(--bg)', border: 'none' }}
+                        style={{ background: 'var(--primary)', color: 'var(--surface)', border: 'none' }}
                     >
                         Next Step →
                     </button>

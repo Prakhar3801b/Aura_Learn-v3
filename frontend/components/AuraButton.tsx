@@ -28,7 +28,7 @@ export function AuraButton({
     const variantStyles: Record<string, React.CSSProperties> = {
         primary: {
             background: 'var(--primary)',
-            color: 'var(--bg)',
+            color: 'var(--surface)',
             border: 'none',
         },
         outline: {
@@ -37,14 +37,14 @@ export function AuraButton({
             border: active ? '1px solid var(--primary)' : '1px solid var(--border)',
         },
         success: {
-            background: '#D4F5E9',
-            color: '#1A6B3C',
-            border: '1px solid #B8E8D4',
+            background: 'var(--pastel-mint)',
+            color: 'var(--success)',
+            border: '1px solid var(--border)',
         },
         danger: {
-            background: '#FFD6D6',
-            color: '#B91C1C',
-            border: '1px solid #FFBDBD',
+            background: 'var(--pastel-rose)',
+            color: 'var(--danger)',
+            border: '1px solid var(--border)',
         },
     };
 

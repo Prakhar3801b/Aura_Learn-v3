@@ -7,7 +7,6 @@ import { useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '@/lib/supabase';
 import { chatMulti, getMaterial } from '@/lib/api';
-import Navbar from '@/components/Navbar';
 import { AuraButton } from '@/components/AuraButton';
 
 function MultiStudyPageContent() {
@@ -69,8 +68,8 @@ function MultiStudyPageContent() {
     if (loading) return <div style={{ padding: '2rem' }}>Loading Fusion Engine...</div>;
 
     return (
-        <div style={{ background: '#FDFCFB', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-            <Navbar />
+        <div style={{ background: 'var(--bg)', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+
 
             <div style={{ flex: 1, display: 'flex', padding: '2rem', gap: '2rem', maxWidth: '1400px', margin: '0 auto', width: '100%' }}>
 

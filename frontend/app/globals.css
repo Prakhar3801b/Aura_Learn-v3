@@ -111,10 +111,12 @@
 
 [data-theme='dark'] .sidebar-link:hover {
   background: var(--hover-overlay);
+  color: var(--primary);
 }
 
 [data-theme='dark'] .sidebar-link.active {
   background: rgba(232, 226, 218, 0.08);
+  color: var(--primary);
 }
 
 [data-theme='dark'] .shimmer {
@@ -255,7 +257,7 @@ body {
   top: 50%;
   transform: translateY(-50%);
   background: var(--primary);
-  color: #fff;
+  color: var(--surface);
   font-size: 0.72rem;
   font-weight: 500;
   padding: 0.3rem 0.6rem;
@@ -580,6 +582,19 @@ body {
   transform: translateX(0.1em);
 }
 
+[data-theme='dark'] .btn-get-started {
+  background: var(--primary);
+  color: var(--surface);
+}
+
+[data-theme='dark'] .btn-get-started .icon {
+  background: var(--surface);
+}
+
+[data-theme='dark'] .btn-get-started .icon svg {
+  color: var(--primary);
+}
+
 /* ── Inputs ── */
 .aura-input {
   background: var(--input-bg);
@@ -630,6 +645,7 @@ body {
   color: var(--text);
   cursor: pointer;
   transition: all 0.2s ease;
+  font-family: 'Inter', sans-serif;
 }
 
 .category-pill:hover {
@@ -638,7 +654,7 @@ body {
 
 .category-pill.active {
   background: var(--primary);
-  color: #fff;
+  color: var(--surface);
   border-color: var(--primary);
 }
 

@@ -126,47 +126,55 @@ Return ONLY valid JSON with this structure:
   "instructions": "Supporting details or context",
   "expected_outcome": "What a perfect answer should cover"
 }}"""
+SIMULATION_PROMPT = """You are an expert educational simulation engine.
+Analyze the following study material and convert a core concept into a clean, interactive, and visually structured simulation.
 
-SIMULATION_PROMPT = """You are an expert educational visualizer. Analyze the following study material and identify a core concept that can be explained through a step-by-step visual simulation.
-
-Study Material:
+INPUT:
 {text}
 
-Generate a structured JSON simulation. The simulation should be applicable to the subject (e.g., an algorithm for CS, a process for Science, a timeline for History, etc.).
+GOAL:
+Generate an INTERACTIVE VISUAL SIMULATION that helps a student deeply understand the concept.
 
-Return ONLY valid JSON with this exact structure:
+The simulation should:
+1. Represent the concept visually (arrays, graphs, particles, flows, etc.)
+2. Animate step-by-step transitions
+3. Include clear narration for each step
+4. Highlight active elements dynamically
+5. Maintain logical flow (no chaotic visuals)
+
+OUTPUT FORMAT (STRICT JSON):
 {{
   "title": "Simulation Title",
-  "subject_area": "Subject (e.g. Computer Science, Biology)",
-  "description": "Brief explanation of what is being simulated",
-  "visual_type": "array|graph|tree|process_flow|timeline|comparison|cycle|formula",
+  "concept_summary": "Short 2-3 line explanation of the core idea",
+  "visual_structure": {{
+    "type": "array | graph | flow | system | molecular | custom",
+    "elements": [ ... ]
+  }},
   "steps": [
     {{
-      "step_number": 1,
-      "narration": "What is happening in this step",
-      "elements": [
-        {{ "id": "e1", "label": "Value/Label", "state": "default|highlighted|active|completed|error" }}
-      ],
-      "annotations": [
-        {{ "text": "Supporting text/data", "position": "top|bottom" }}
-      ]
+      "step_title": "Step name",
+      "narration": "What is happening in this step (detailed explanation)",
+      "elements_to_highlight": ["id1", "id2"],
+      "animation_type": "move | scale | fade | highlight"
     }}
-  ]
+  ],
+  "controls": ["start", "pause", "next", "reset"],
+  "domain": "DSA | Physics | Chemistry | Biology | Math | Engineering"
 }}
 
-Create 5-10 logical steps that clearly demonstrate the concept."""
+Create 6-12 logical steps that clearly demonstrate the concept."""
 
-SESSION_INSIGHTS_PROMPT = """You are an AI study coach. Analyze this student's study session events and provide structured insights.
+SESSION_INSIGHTS_PROMPT = """You are an AI study coach like ChatGPT or Gemini. Analyze this student's study session and provide a professional, structured review.
 
 Session Events:
 {events}
 
-Return ONLY valid JSON with exactly this structure:
+Return ONLY valid JSON:
 {{
-  "learned": ["...", "..."],
-  "doubts": ["...", "..."],
-  "review": "A brief AI analysis of performance and focus.",
-  "recap": "A 1-2 sentence quick summary of the entire session."
+  "learned": ["Point 1", "Point 2"],
+  "doubts": ["Potential area for review 1"],
+  "review": "A detailed, encouraging analysis of the user's performance, strengths, and areas to focus on next.",
+  "recap": "A concise 1-2 sentence executive summary of the entire session."
 }}"""
 
 

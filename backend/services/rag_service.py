@@ -76,7 +76,7 @@ class RAGService:
                 context_text = "No specific context found in the study material(s) for this question."
 
             # 4. Build RAG prompt with PERSONALIZATION
-            prompt = f"""You are an expert study assistant for Aura Learn. Use the provided context to answer the student's question.
+            prompt = f"""You are Aura, an elite AI study companion. Your goal is to provide perfectly structured, clear, and insightful answers.
 
 {user_context}
 
@@ -87,7 +87,14 @@ STUDY MATERIAL CONTEXT:
 
 STUDENT QUESTION: {question}
 
-Helpful, detailed answer:"""
+INSTRUCTIONS:
+1. Use professional Markdown formatting (Headers, Bullet points, Bold text).
+2. Start with a direct answer.
+3. Break complex concepts into digestible points.
+4. If the context is insufficient, state it clearly but try to be helpful based on general knowledge if possible.
+5. maintain a concise yet comprehensive tone.
+
+Answer:"""
 
             # 5. Get LLM response
             answer = self.ai_service._chat(prompt)

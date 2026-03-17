@@ -120,21 +120,21 @@ export default function LandingPage() {
             fontFamily: "'JetBrains Mono', monospace",
             fontSize: 'max(1.8rem, 2.5vw)',
             fontWeight: 600,
-            color: '#1A1A2E',
+            color: 'var(--text)',
             marginBottom: '0.5rem',
             opacity: 0.9,
             display: 'flex',
             alignItems: 'center',
             gap: '0.4rem'
           }}>
-            <span style={{ color: '#7C3AED' }}>&gt;</span> Aura_Learn
+            <span style={{ color: 'var(--primary)' }}>&gt;</span> Aura_Learn
           </div>
           <h1
             style={{
               fontSize: 'clamp(1.2rem, 2.8vw, 1.8rem)',
               fontWeight: 800,
               lineHeight: 1.2,
-              color: '#1A1A2E',
+              color: 'var(--text)',
               maxWidth: '1000px',
             }}
           >
@@ -150,9 +150,9 @@ export default function LandingPage() {
             <button
               style={{
                 background: 'transparent',
-                border: '1px solid #E8E2DA',
+                border: '1px solid var(--border)',
                 borderRadius: '10px',
-                color: '#1A1A2E',
+                color: 'var(--text)',
                 fontWeight: 600,
                 fontSize: '0.9rem',
                 padding: '0.65rem 1.5rem',
@@ -191,7 +191,7 @@ export default function LandingPage() {
         style={{
           fontWeight: 500,
           fontSize: '0.85rem',
-          color: '#7C7C8A',
+          color: 'var(--muted)',
           letterSpacing: '0.03em',
           marginBottom: '1.25rem',
         }}
@@ -233,9 +233,10 @@ export default function LandingPage() {
                 <h3>{f.title}</h3>
                 <p style={{
                   fontSize: '0.82rem',
-                  color: 'rgba(26, 26, 46, 0.65)',
+                  color: 'var(--muted)',
                   lineHeight: 1.5,
                   marginBottom: '1rem',
+                  opacity: 0.8
                 }}>
                   {f.description}
                 </p>
@@ -245,13 +246,13 @@ export default function LandingPage() {
                   <span className="feature-meta">{f.students} students</span>
                   {f.badge && (
                     <span style={{
-                      background: 'rgba(255,255,255,0.5)',
+                      background: 'rgba(255,255,255,0.3)',
                       padding: '0.15rem 0.5rem',
                       borderRadius: '99px',
                       fontSize: '0.68rem',
                       fontWeight: 600,
                       fontFamily: "'JetBrains Mono', monospace",
-                      color: '#7C3AED',
+                      color: 'var(--primary)',
                     }}>
                       🏆 {f.badge}
                     </span>
@@ -271,7 +272,7 @@ export default function LandingPage() {
         style={{
           fontFamily: "'JetBrains Mono', monospace",
           fontSize: '0.78rem',
-          color: '#7C7C8A',
+          color: 'var(--muted)',
           letterSpacing: '0.02em',
           marginBottom: '1rem',
         }}
@@ -293,12 +294,12 @@ export default function LandingPage() {
           fontFamily: 'Outfit, sans-serif',
           fontSize: '1.6rem',
           fontWeight: 800,
-          color: '#1A1A2E',
+          color: 'var(--text)',
           marginBottom: '0.75rem',
         }}>
           Ready to Transform How You Study?
         </h2>
-        <p style={{ color: '#7C7C8A', marginBottom: '1.5rem', fontSize: '0.92rem' }}>
+        <p style={{ color: 'var(--muted)', marginBottom: '1.5rem', fontSize: '0.92rem' }}>
           Upload your first material and get AI-powered results in seconds.
         </p>
         <Link href="/register">

@@ -281,31 +281,66 @@ async def list_user_materials(user_id: str):
 
 @router.delete("/{material_id}")
 async def delete_material(material_id: str, user_id: str):
-    """Delete a study material and all its related data (cascades in DB)."""
+    """Delete a study material and its associated assets."""
     supabase = get_supabase()
-
-    # 1. Verify the material exists and belongs to the user
-    result = supabase.table("study_materials").select("*").eq("id", material_id).single().execute()
-    if not result.data:
-        raise HTTPException(404, "Material not found")
-    if result.data.get("user_id") != user_id:
-        raise HTTPException(403, "You can only delete your own materials")
-
-    # 2. Delete from Supabase Storage
-    file_url = result.data.get("file_url", "")
-    try:
-        # Extract storage path from public URL
-        # URL format: .../storage/v1/object/public/study-materials/{user_id}/{material_id}/{filename}
-        if "study-materials/" in file_url:
+    
+    # 1. Check ownership and get file path
+    res = supabase.table("study_materials").select("user_id, file_url").eq("id", material_id).single().execute()
+    if not res.data or res.data["user_id"] != user_id:
+        raise HTTPException(403, "Not authorized to delete this material")
+        
+    # 2. Extract storage path from URL and delete if exists
+    file_url = res.data.get("file_url", "")
+    if "study-materials/" in file_url:
+        try:
             storage_path = file_url.split("study-materials/")[1]
             supabase.storage.from_("study-materials").remove([storage_path])
-            logger.info(f"Deleted storage file: {storage_path}")
-    except Exception as e:
-        logger.warning(f"Storage deletion failed (continuing): {e}")
+        except Exception as e:
+            logger.warning(f"Failed to delete storage file: {e}")
 
-    # 3. Delete DB row (ON DELETE CASCADE handles flashcards, exam_points, mind_map, chunks, sessions)
+    # 3. Delete DB row (ON DELETE CASCADE handles children)
     supabase.table("study_materials").delete().eq("id", material_id).execute()
-    logger.info(f"Material {material_id} deleted by user {user_id}")
+    return {"deleted": True}
 
-    return {"deleted": True, "material_id": material_id}
+
+class BatchDeleteRequest(BaseModel):
+    material_ids: List[str]
+    user_id: str
+
+@router.request("DELETE", "/batch")
+async def delete_materials_batch(request: BatchDeleteRequest):
+    """Batch delete study materials."""
+    supabase = get_supabase()
+    
+    # 1. Fetch materials to verify ownership and get file paths
+    mats = (
+        supabase.table("study_materials")
+        .select("id, user_id, file_url")
+        .in_("id", request.material_ids)
+        .execute()
+    )
+    
+    valid_ids = []
+    storage_paths = []
+    for m in mats.data:
+        if m["user_id"] == request.user_id:
+            valid_ids.append(m["id"])
+            file_url = m.get("file_url", "")
+            if "study-materials/" in file_url:
+                storage_paths.append(file_url.split("study-materials/")[1])
+                
+    if not valid_ids:
+        return {"deleted": 0}
+        
+    # 2. Delete from storage
+    if storage_paths:
+        try:
+            supabase.storage.from_("study-materials").remove(storage_paths)
+        except Exception as e:
+            logger.warning(f"Batch storage deletion warning: {e}")
+            
+    # 3. Delete from DB
+    res = supabase.table("study_materials").delete().in_("id", valid_ids).execute()
+    
+    return {"deleted": len(valid_ids)}
 

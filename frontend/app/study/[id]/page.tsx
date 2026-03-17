@@ -79,6 +79,15 @@ export default function StudyPage({ params }: { params: Promise<{ id: string }> 
     };
 
     useEffect(() => {
+        if (!loading && material) {
+            // Trigger aura-chat-open event for the automated pop-out
+            setTimeout(() => {
+                window.dispatchEvent(new CustomEvent('aura-chat-open'));
+            }, 800);
+        }
+    }, [loading, material]);
+
+    useEffect(() => {
         async function checkStatus() {
             try {
                 const mat = await getMaterial(id);

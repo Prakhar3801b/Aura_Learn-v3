@@ -153,7 +153,7 @@ Choose the BEST simulation type:
 
 STEP 3: STRUCTURE DESIGN
 Define:
-1. COMPONENTS: Core static units (nodes, containers, modules). Use logical {x, y} coordinates (0-800 range).
+1. COMPONENTS: Core static units (nodes, containers, modules). Use logical {{x, y}} coordinates (0-800 range).
 2. ENTITIES: Dynamic elements that move or change (data packets, signals, molecules).
 3. CONNECTIONS: Define directional relationships (from -> to).
 
@@ -215,6 +215,21 @@ IMPORTANT RULES:
 - Ensure technical accuracy for the domain.
 """
 
+PRACTICAL_FEEDBACK_PROMPT = """You are an expert tutor evaluating a student's response to a practical challenge.
+Compare the student's answer against the study material and the original challenge.
+
+Study Material:
+{text}
+
+Challenge:
+{challenge}
+
+Student's Answer:
+{answer}
+
+Provide constructive, detailed feedback. Start by stating if the answer is "Excellent", "Good", or "Needs Improvement", then explain why, highlighting what was missed or correctly identified."""
+
+
 SESSION_INSIGHTS_PROMPT = """You are an AI study coach like ChatGPT or Gemini. Analyze this student's study session and provide a professional, structured review.
 
 Session Events:
@@ -252,7 +267,7 @@ class AIService:
 
     def generate_simulation(self, text: str, material_id: str) -> Dict[str, Any]:
         """Generate a visual simulation from study text."""
-        prompt = SIMULATION_PROMPT.format(text=text[:8000])
+        prompt = SIMULATION_PROMPT.format(text=text[:8000], material_id=material_id)
         raw = self._chat(prompt)
         return self._safe_json_parse(raw)
 

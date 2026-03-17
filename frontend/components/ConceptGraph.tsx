@@ -33,7 +33,7 @@ function buildFlowNodes(rawNodes: any[]): Node[] {
                         <div style={{
                             fontWeight: isRelation ? 600 : 700,
                             fontSize: isRelation ? '0.65rem' : '0.85rem',
-                            color: isRelation ? '#F59E0B' : '#1A1A2E',
+                            color: isRelation ? '#F59E0B' : 'var(--text)',
                             textTransform: isRelation ? 'uppercase' : 'none'
                         }}>
                             {n.label}
@@ -46,10 +46,10 @@ function buildFlowNodes(rawNodes: any[]): Node[] {
                 y: 300 + Math.sin((i / rawNodes.length) * 2 * Math.PI) * 250,
             },
             style: {
-                background: '#FFFFFF',
+                background: 'var(--surface)',
                 border: `2px solid ${isRelation ? '#F59E0B' : '#7C3AED'}`,
                 borderRadius: isRelation ? '50px' : '8px',
-                color: '#1A1A2E',
+                color: 'var(--text)',
                 minWidth: isRelation ? '80px' : '140px',
                 boxShadow: isRelation ? '0 1px 4px rgba(0,0,0,0.04)' : '0 3px 10px rgba(0,0,0,0.08)',
                 padding: '0',
@@ -100,15 +100,15 @@ export default function ConceptGraph({ nodes: rawNodes, edges: rawEdges, onNodeC
     );
 
     return (
-        <div style={{ width: '100%', height: '100%', borderRadius: '16px', overflow: 'hidden', background: '#FDFCFB' }}>
+        <div style={{ width: '100%', height: '100%', borderRadius: '16px', overflow: 'hidden', background: 'var(--bg)' }}>
             <div style={{ position: 'absolute', top: '1rem', left: '1rem', zIndex: 5, display: 'flex', gap: '1rem' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.75rem' }}>
-                    <div style={{ width: '12px', height: '12px', background: 'white', border: '2px solid #7C3AED', borderRadius: '2px' }}></div>
-                    <span style={{ fontWeight: 600, color: '#4A4A5A' }}>Concept</span>
+                    <div style={{ width: '12px', height: '12px', background: 'var(--surface)', border: '2px solid #7C3AED', borderRadius: '2px' }}></div>
+                    <span style={{ fontWeight: 600, color: 'var(--text)' }}>Concept</span>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.75rem' }}>
-                    <div style={{ width: '12px', height: '12px', background: 'white', border: '2px solid #F59E0B', borderRadius: '50%' }}></div>
-                    <span style={{ fontWeight: 600, color: '#4A4A5A' }}>Relation</span>
+                    <div style={{ width: '12px', height: '12px', background: 'var(--surface)', border: '2px solid #F59E0B', borderRadius: '50%' }}></div>
+                    <span style={{ fontWeight: 600, color: 'var(--text)' }}>Relation</span>
                 </div>
             </div>
 

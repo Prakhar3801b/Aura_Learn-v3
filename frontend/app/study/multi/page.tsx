@@ -75,15 +75,15 @@ function MultiStudyPageContent() {
 
                 {/* Sidebar: Knowledge Base Info */}
                 <div style={{ width: '300px', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                    <div className="card" style={{ padding: '1.5rem' }}>
+                    <div className="card" style={{ padding: '1.5rem', background: 'var(--surface)' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
                             <span style={{ fontSize: '1.2rem' }}>🧬</span>
-                            <h3 style={{ fontWeight: 800, fontSize: '1rem', color: '#1A1A2E' }}>Knowledge Fusion</h3>
+                            <h3 style={{ fontWeight: 800, fontSize: '1rem', color: 'var(--text)' }}>Knowledge Fusion</h3>
                         </div>
                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
                             {materials.map(m => (
                                 <div key={m.id} style={{
-                                    padding: '0.3rem 0.6rem', background: '#F3F0EB', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 600, color: '#4A4A5A'
+                                    padding: '0.3rem 0.6rem', background: 'var(--bg)', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text)', border: '1px solid var(--border)'
                                 }}>
                                     {m.title}
                                 </div>
@@ -91,7 +91,7 @@ function MultiStudyPageContent() {
                         </div>
                     </div>
 
-                    <div className="card" style={{ padding: '1.5rem', background: '#1A1A2E', color: 'white' }}>
+                    <div className="card" style={{ padding: '1.5rem', background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text)' }}>
                         <div style={{ fontSize: '0.75rem', fontWeight: 600, opacity: 0.7, marginBottom: '0.5rem', textTransform: 'uppercase' }}>Learning Proficiency</div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
                             <span style={{ fontSize: '1.5rem' }}>🏆</span>
@@ -104,8 +104,8 @@ function MultiStudyPageContent() {
                 </div>
 
                 {/* Main: Merged Chat */}
-                <div className="card" style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: '0', overflow: 'hidden' }}>
-                    <div style={{ padding: '1.25rem', borderBottom: '1px solid #E8E2DA', background: '#FDFCFB', fontWeight: 700 }}>
+                <div className="card" style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: '0', overflow: 'hidden', background: 'var(--surface)', border: '1px solid var(--border)' }}>
+                    <div style={{ padding: '1.25rem', borderBottom: '1px solid var(--border)', background: 'var(--surface)', fontWeight: 700, color: 'var(--text)' }}>
                         Fusion Chat Assistant
                     </div>
 
@@ -120,24 +120,25 @@ function MultiStudyPageContent() {
                                     maxWidth: '80%',
                                     padding: '1rem',
                                     borderRadius: '16px',
-                                    background: m.role === 'user' ? '#1A1A2E' : '#F3F0EB',
-                                    color: m.role === 'user' ? 'white' : '#1A1A2E',
+                                    background: m.role === 'user' ? 'var(--primary)' : 'var(--input-bg)',
+                                    color: m.role === 'user' ? 'var(--bg)' : 'var(--text)',
                                     fontSize: '0.9rem',
                                     lineHeight: 1.5,
-                                    boxShadow: '0 2px 5px rgba(0,0,0,0.02)'
+                                    boxShadow: '0 2px 5px rgba(0,0,0,0.02)',
+                                    border: m.role === 'user' ? 'none' : '1px solid var(--border)'
                                 }}
                             >
                                 {m.content}
                             </motion.div>
                         ))}
                         {chatLoading && (
-                            <div style={{ alignSelf: 'flex-start', padding: '1rem', borderRadius: '16px', background: '#F3F0EB' }}>
+                            <div style={{ alignSelf: 'flex-start', padding: '1rem', borderRadius: '16px', background: 'var(--input-bg)', color: 'var(--text)', border: '1px solid var(--border)' }}>
                                 <motion.span animate={{ opacity: [0.3, 1, 0.3] }} transition={{ repeat: Infinity, duration: 1.5 }}>Analysis in progress...</motion.span>
                             </div>
                         )}
                     </div>
 
-                    <div style={{ padding: '1.5rem', background: '#FDFCFB', borderTop: '1px solid #E8E2DA' }}>
+                    <div style={{ padding: '1.5rem', background: 'var(--surface)', borderTop: '1px solid var(--border)' }}>
                         <div style={{ display: 'flex', gap: '0.75rem' }}>
                             <input
                                 type="text"
@@ -150,7 +151,9 @@ function MultiStudyPageContent() {
                                     height: '3rem',
                                     padding: '0 1.25rem',
                                     borderRadius: '12px',
-                                    border: '1px solid #E8E2DA',
+                                    border: '1px solid var(--border)',
+                                    background: 'var(--bg)',
+                                    color: 'var(--text)',
                                     outline: 'none',
                                     fontSize: '0.9rem'
                                 }}

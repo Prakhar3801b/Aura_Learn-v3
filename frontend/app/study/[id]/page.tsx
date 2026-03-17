@@ -357,31 +357,14 @@ export default function StudyPage({ params }: { params: Promise<{ id: string }> 
             {/* Delete Confirmation Modal */}
             <AnimatePresence>
                 {showDeleteConfirm && (
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        style={{
-                            position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)',
-                            display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            zIndex: 999,
-                        }}
-                        onClick={() => !deleting && setShowDeleteConfirm(false)}
-                    >
+                    <div className="modal-backdrop" onClick={() => !deleting && setShowDeleteConfirm(false)}>
                         <motion.div
                             initial={{ scale: 0.9, opacity: 0 }}
                             animate={{ scale: 1, opacity: 1 }}
                             exit={{ scale: 0.9, opacity: 0 }}
                             onClick={(e) => e.stopPropagation()}
-                            style={{
-                                background: 'var(--surface)',
-                                borderRadius: '20px',
-                                padding: '2rem',
-                                maxWidth: '400px',
-                                width: '90%',
-                                boxShadow: '0 20px 60px rgba(0,0,0,0.15)',
-                                textAlign: 'center',
-                            }}
+                            className="modal-content"
+                            style={{ textAlign: 'center' }}
                         >
                             <div style={{ fontSize: '2.5rem', marginBottom: '0.75rem' }}>⚠️</div>
                             <h3 style={{ fontFamily: 'Outfit', fontWeight: 700, fontSize: '1.15rem', color: 'var(--text)', marginBottom: '0.5rem' }}>
@@ -418,7 +401,7 @@ export default function StudyPage({ params }: { params: Promise<{ id: string }> 
                                 </button>
                             </div>
                         </motion.div>
-                    </motion.div>
+                    </div>
                 )}
             </AnimatePresence>
         </div>

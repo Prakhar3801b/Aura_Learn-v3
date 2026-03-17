@@ -135,34 +135,43 @@ INPUT:
 GOAL:
 Generate an INTERACTIVE VISUAL SIMULATION that helps a student deeply understand the concept.
 
-The simulation should:
-1. Represent the concept visually (arrays, graphs, particles, flows, etc.)
-2. Animate step-by-step transitions
-3. Include clear narration for each step
-4. Highlight active elements dynamically
-5. Maintain logical flow (no chaotic visuals)
+CRITICAL INSTRUCTIONS ON VISUAL PATTERNS:
+- DO NOT use algorithmic patterns (like sliding windows, sorting, or arrays) for non-DSA concepts.
+- ARCHITECTURE: Use "system" or "flow" types. Show nodes like "Source", "Warehouse", "OLAP", "Users".
+- NETWORKS: Use "graph" or "flow". Show packets moving between routers/clients.
+- BIOLOGY/CHEMISTRY: Use "molecular" or "system". Show interactions between components.
+- ALGORITHMS (DSA): Use "array" or "graph" patterns only here.
+
+VISUAL STRUCTURE TYPES:
+- "array": A linear collection of elements.
+- "graph": Nodes and edges (connections).
+- "flow": A directed process or pipeline.
+- "system": A set of interacting components in a container.
+- "molecular": Dynamic particles interacting.
 
 OUTPUT FORMAT (STRICT JSON):
 {{
   "title": "Simulation Title",
   "concept_summary": "Short 2-3 line explanation of the core idea",
   "visual_structure": {{
-    "type": "array | graph | flow | system | molecular | custom",
-    "elements": [ ... ]
+    "type": "array | graph | flow | system | molecular",
+    "elements": [ 
+      {{ "id": "e1", "label": "Name", "status": "default", "position": {{ "x": 0, "y": 0 }} }}
+    ]
   }},
   "steps": [
     {{
       "step_title": "Step name",
-      "narration": "What is happening in this step (detailed explanation)",
-      "elements_to_highlight": ["id1", "id2"],
-      "animation_type": "move | scale | fade | highlight"
+      "narration": "Detailed explanation of this specific state change",
+      "elements_to_highlight": ["e1", "e2"],
+      "action": "What happens (e.g., 'Data moves from source to sink')"
     }}
   ],
   "controls": ["start", "pause", "next", "reset"],
-  "domain": "DSA | Physics | Chemistry | Biology | Math | Engineering"
+  "domain": "DSA | Physics | Chemistry | Biology | Math | Engineering | Architecture"
 }}
 
-Create 6-12 logical steps that clearly demonstrate the concept."""
+Ensure the simulation logic is technically accurate to the domain. Create 6-12 logical steps."""
 
 SESSION_INSIGHTS_PROMPT = """You are an AI study coach like ChatGPT or Gemini. Analyze this student's study session and provide a professional, structured review.
 

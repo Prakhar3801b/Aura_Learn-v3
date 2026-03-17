@@ -1090,3 +1090,97 @@ body {
   border-radius: 12px;
   font-family: 'JetBrains Mono', monospace;
 }
+
+/* ── Modals ── */
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+  width: 90%;
+  max-width: 450px;
+  padding: 2.5rem;
+  position: relative;
+  overflow: hidden;
+  animation: modal-enter 0.3s ease-out;
+}
+
+@keyframes modal-enter {
+  from { opacity: 0; transform: scale(0.95) translateY(10px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+/* ── React Flow & Graphs Dark Mode ── */
+.react-flow__node {
+  color: var(--text) !important;
+}
+
+.react-flow__edge-path {
+  stroke: var(--secondary) !important;
+  stroke-width: 2;
+}
+
+.react-flow__edge-text {
+  fill: var(--text) !important;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.react-flow__controls {
+  background: var(--surface) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 8px !important;
+}
+
+.react-flow__controls-button {
+  background: transparent !important;
+  border-bottom: 1px solid var(--border) !important;
+  color: var(--text) !important;
+}
+
+.react-flow__attribution {
+  display: none !important;
+}
+
+.react-flow__node-concept {
+  background: var(--surface) !important;
+  border: 2px solid var(--primary) !important;
+  border-radius: 12px;
+  padding: 10px;
+  font-weight: 700;
+}
+
+.react-flow__node-relation {
+  background: var(--pastel-peach) !important;
+  border: 2px solid #F59E0B !important;
+  border-radius: 50%;
+  width: 80px;
+  height: 80px;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 800;
+  color: #854D0E !important;
+}
+
+[data-theme='dark'] .react-flow__node-relation {
+  background: #2D2D44 !important;
+  color: #FBBF24 !important;
+  border-color: #FBBF24 !important;
+}

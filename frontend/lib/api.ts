@@ -99,17 +99,14 @@ export async function getUserMaterials(userId: string): Promise<Material[]> {
 }
 
 export const deleteMaterial = async (materialId: string, userId: string) => {
-    const res = await fetch(`${API_BASE}/materials/${materialId}?user_id=${userId}`, { method: 'DELETE' });
-    return res.json();
+    return fetchAPI(`/materials/${materialId}?user_id=${userId}`, { method: 'DELETE' });
 };
 
 export const deleteMaterialsBatch = async (materialIds: string[], userId: string) => {
-    const res = await fetch(`${API_BASE}/materials/batch`, {
+    return fetchAPI(`/materials/batch`, {
         method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ material_ids: materialIds, user_id: userId })
     });
-    return res.json();
 };
 export async function generateSimulation(materialId: string) {
     return fetchAPI<any>(`/ai/simulation/generate/${materialId}`, { method: 'POST' }, 60000);

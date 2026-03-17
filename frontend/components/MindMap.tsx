@@ -32,7 +32,7 @@ function buildFlowNodes(rawNodes: any[]): Node[] {
         data: {
             label: (
                 <div style={{ textAlign: 'center', padding: '4px 8px' }}>
-                    <div style={{ fontWeight: 700, fontSize: '0.8rem', color: '#1A1A2E', marginBottom: '2px' }}>
+                    <div style={{ fontWeight: 700, fontSize: '0.8rem', color: 'var(--text)', marginBottom: '2px' }}>
                         {n.label}
                     </div>
                     {n.video_timestamp_label && (
@@ -58,12 +58,12 @@ function buildFlowNodes(rawNodes: any[]): Node[] {
             y: 200 + Math.sin((i / rawNodes.length) * 2 * Math.PI) * 180,
         },
         style: {
-            background: '#FFFFFF',
+            background: 'var(--surface)',
             border: `2px solid ${n.color || nodeTypeColor(n.node_type)}`,
             borderRadius: '12px',
-            color: '#1A1A2E',
+            color: 'var(--text)',
             minWidth: '120px',
-            boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
+            boxShadow: 'var(--shadow-card)',
         },
         type: 'default',
     }));

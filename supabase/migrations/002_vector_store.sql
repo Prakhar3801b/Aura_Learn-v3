@@ -25,7 +25,7 @@ CREATE INDEX IF NOT EXISTS material_chunks_embedding_idx
 
 -- Function for similarity search
 CREATE OR REPLACE FUNCTION search_material_chunks(
-  query_embedding vector(1536),
+  query_embedding vector(1024),
   match_material_id UUID,
   match_count INT DEFAULT 5
 )

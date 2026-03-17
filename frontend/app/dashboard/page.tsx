@@ -71,6 +71,7 @@ export default function DashboardPage() {
             setSelectedIds(prev => prev.filter(id => id !== deleteTarget.id));
         } catch (e) {
             console.error('Delete failed:', e);
+            alert('Could not delete material. Please check your connection.');
         } finally {
             setDeleting(false);
         }
@@ -87,6 +88,7 @@ export default function DashboardPage() {
             setSelectMode(false);
         } catch (e) {
             console.error('Batch delete failed:', e);
+            alert('Batch delete failed. Some items may still remain.');
         } finally {
             setDeleting(false);
         }

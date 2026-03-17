@@ -126,52 +126,94 @@ Return ONLY valid JSON with this structure:
   "instructions": "Supporting details or context",
   "expected_outcome": "What a perfect answer should cover"
 }}"""
-SIMULATION_PROMPT = """You are an expert educational simulation engine.
-Analyze the following study material and convert a core concept into a clean, interactive, and visually structured simulation.
+SIMULATION_PROMPT = """You are an advanced simulation planning engine for an AI-powered learning platform.
+Your job is to convert study material into a structured simulation plan that can be rendered by a frontend system.
+
+You DO NOT generate UI code.
+You ONLY generate structured simulation data in valid JSON.
+
+----------------------------------------
 
 INPUT:
-{text}
+Study Content: {text}
+Optional Focus Topic: {material_id}
 
-GOAL:
-Generate an INTERACTIVE VISUAL SIMULATION that helps a student deeply understand the concept.
+----------------------------------------
 
-CRITICAL INSTRUCTIONS ON VISUAL PATTERNS:
-- DO NOT use algorithmic patterns (like sliding windows, sorting, or arrays) for non-DSA concepts.
-- ARCHITECTURE: Use "system" or "flow" types. Show nodes like "Source", "Warehouse", "OLAP", "Users".
-- NETWORKS: Use "graph" or "flow". Show packets moving between routers/clients.
-- BIOLOGY/CHEMISTRY: Use "molecular" or "system". Show interactions between components.
-- ALGORITHMS (DSA): Use "array" or "graph" patterns only here.
+STEP 1: DOMAIN DETECTION
+Identify the domain: DSA, Physics, Chemistry, Biology, Engineering, Math, Medical, or General Systems.
 
-VISUAL STRUCTURE TYPES:
-- "array": A linear collection of elements.
-- "graph": Nodes and edges (connections).
-- "flow": A directed process or pipeline.
-- "system": A set of interacting components in a container.
-- "molecular": Dynamic particles interacting.
+STEP 2: SIMULATION TYPE SELECTION
+Choose the BEST simulation type:
+- array → indexed data, linear sequences, algorithms
+- flow → pipelines, processes, transformations, data movement
+- graph → networks, trees, complex relationships
+- system → interacting high-level components/modules
+- molecular → particles, biological/chemical microscopic interactions
 
-OUTPUT FORMAT (STRICT JSON):
+STEP 3: STRUCTURE DESIGN
+Define:
+1. COMPONENTS: Core static units (nodes, containers, modules). Use logical {x, y} coordinates (0-800 range).
+2. ENTITIES: Dynamic elements that move or change (data packets, signals, molecules).
+3. CONNECTIONS: Define directional relationships (from -> to).
+
+STEP 4: STEP-BY-STEP SIMULATION
+Create 6–10 steps. Each step MUST include at least one movement or transformation.
+
+STEP 5: ANIMATION DESIGN
+Each step must include an "animations" array:
 {{
-  "title": "Simulation Title",
-  "concept_summary": "Short 2-3 line explanation of the core idea",
-  "visual_structure": {{
-    "type": "array | graph | flow | system | molecular",
-    "elements": [ 
-      {{ "id": "e1", "label": "Name", "status": "default", "position": {{ "x": 0, "y": 0 }} }}
-    ]
-  }},
-  "steps": [
-    {{
-      "step_title": "Step name",
-      "narration": "Detailed explanation of this specific state change",
-      "elements_to_highlight": ["e1", "e2"],
-      "action": "What happens (e.g., 'Data moves from source to sink')"
-    }}
-  ],
-  "controls": ["start", "pause", "next", "reset"],
-  "domain": "DSA | Physics | Chemistry | Biology | Math | Engineering | Architecture"
+  "type": "move | highlight | transform | scale | rotate | pulse",
+  "target": "entity_id or component_id",
+  "from": "component_id (for move)",
+  "to": "component_id (for move)",
+  "duration": 1.0–2.0,
+  "style": {{ "glow": true, "trail": true, "color": "#hex" }}
 }}
 
-Ensure the simulation logic is technically accurate to the domain. Create 6-12 logical steps."""
+STEP 6: SPATIAL DESIGN
+- Use clean layout (left→right or top→bottom flow).
+- Keep 4–8 components max.
+- Components should have enough space for entities to move between them.
+
+----------------------------------------
+
+OUTPUT FORMAT (STRICT JSON ONLY):
+{{
+  "title": "Simulation Title",
+  "concept_summary": "Explanation of the core idea",
+  "domain": "Detected domain",
+  "simulation_type": "array | flow | graph | system | molecular",
+  "components": [
+    {{ "id": "comp1", "label": "Name", "type": "node", "position": {{ "x": 100, "y": 200 }}, "style": {{ "color": "blue" }} }}
+  ],
+  "connections": [
+    {{ "from": "comp1", "to": "comp2", "label": "flow direction" }}
+  ],
+  "entities": [
+    {{ "id": "ent1", "type": "data | signal | particle", "label": "Data", "current_position": "comp1" }}
+  ],
+  "steps": [
+    {{
+      "step": 1,
+      "step_title": "Step name",
+      "narration": "What is happening in this step",
+      "animations": [
+        {{ "type": "move", "target": "ent1", "from": "comp1", "to": "comp2", "duration": 1.5 }}
+      ]
+    }}
+  ],
+  "controls": ["start", "pause", "next", "reset"]
+}}
+
+----------------------------------------
+
+IMPORTANT RULES:
+- IMPORTANT: Use smooth transitions, glow/highlight effects, and motion trails in style hints.
+- Output ONLY valid JSON.
+- No UI code.
+- Ensure technical accuracy for the domain.
+"""
 
 SESSION_INSIGHTS_PROMPT = """You are an AI study coach like ChatGPT or Gemini. Analyze this student's study session and provide a professional, structured review.
 

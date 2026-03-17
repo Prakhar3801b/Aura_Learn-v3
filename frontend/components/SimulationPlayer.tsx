@@ -5,23 +5,39 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { generateSimulation } from '@/lib/api';
 import { AuraButton } from './AuraButton';
 
+// Import specialized renderers
+import FlowRenderer from './simulations/FlowRenderer';
+import ArrayRenderer from './simulations/ArrayRenderer';
+import GraphRenderer from './simulations/GraphRenderer';
+import SystemRenderer from './simulations/SystemRenderer';
+import MolecularRenderer from './simulations/MolecularRenderer';
+
+interface Animation {
+  type: 'move' | 'highlight' | 'transform' | 'scale' | 'rotate' | 'pulse';
+  target: string;
+  from?: string;
+  to?: string;
+  duration: number;
+  style?: any;
+}
+
 interface SimulationStep {
-    step_title: string;
-    narration: string;
-    elements_to_highlight?: string[];
-    animation_type?: string;
+  step: number;
+  step_title: string;
+  narration: string;
+  animations: Animation[];
 }
 
 interface SimulationData {
-    title: string;
-    concept_summary: string;
-    visual_structure: {
-        type: string;
-        elements: Array<{ id: string; label: string; [key: string]: any }>;
-    };
-    steps: SimulationStep[];
-    controls: string[];
-    domain: string;
+  title: string;
+  concept_summary: string;
+  domain: string;
+  simulation_type: 'array' | 'flow' | 'graph' | 'system' | 'molecular';
+  components: any[];
+  connections: any[];
+  entities: any[];
+  steps: SimulationStep[];
+  controls: string[];
 }
 
 export default function SimulationPlayer({ materialId }: { materialId: string }) {
@@ -43,13 +59,28 @@ export default function SimulationPlayer({ materialId }: { materialId: string })
             .finally(() => setLoading(false));
     }, [materialId]);
 
+    const renderSelectedRenderer = () => {
+        if (!data) return null;
+        
+        const props = { data, currentStep };
+        
+        switch (data.simulation_type) {
+            case 'flow': return <FlowRenderer {...props} />;
+            case 'array': return <ArrayRenderer {...props} />;
+            case 'graph': return <GraphRenderer {...props} />;
+            case 'system': return <SystemRenderer {...props} />;
+            case 'molecular': return <MolecularRenderer {...props} />;
+            default: return <FlowRenderer {...props} />;
+        }
+    };
+
     if (loading) {
         return (
             <div className="card shimmer" style={{ height: '400px', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <div style={{ textAlign: 'center' }}>
-                    <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>🤖</div>
-                    <p style={{ fontWeight: 600 }}>AI is visualizing the concept...</p>
-                    <p style={{ color: 'var(--muted)', fontSize: '0.8rem', marginTop: '0.5rem' }}>Analyzing material for simulation-ready content</p>
+                    <div className="animate-bounce" style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>🔬</div>
+                    <p style={{ fontWeight: 800, fontSize: '1.1rem' }}>Constructing Simulation Plan...</p>
+                    <p style={{ color: 'var(--muted)', fontSize: '0.85rem', marginTop: '0.5rem' }}>AI is Architecting the visual logic</p>
                 </div>
             </div>
         );
@@ -58,10 +89,10 @@ export default function SimulationPlayer({ materialId }: { materialId: string })
     if (error || !data || !data.steps || data.steps.length === 0) {
         return (
             <div className="card" style={{ padding: '3rem', textAlign: 'center' }}>
-                <div style={{ fontSize: '3rem', marginBottom: '0.75rem' }}>❌</div>
-                <h3 style={{ fontFamily: 'Outfit', fontWeight: 700, color: 'var(--text)', marginBottom: '0.4rem' }}>Simulation Unavailable</h3>
-                <p style={{ color: 'var(--muted)', marginBottom: '1.25rem', fontSize: '0.9rem' }}>{error || 'This material might not be suitable for simulation yet.'}</p>
-                <AuraButton variant="outline" onClick={() => window.location.reload()}>Retry Generation</AuraButton>
+                <div style={{ fontSize: '3rem', marginBottom: '0.75rem' }}>⚠️</div>
+                <h3 style={{ fontFamily: 'Outfit', fontWeight: 700, color: 'var(--text)', marginBottom: '0.4rem' }}>Planner Error</h3>
+                <p style={{ color: 'var(--muted)', marginBottom: '1.25rem', fontSize: '0.9rem' }}>{error || 'The simulation plan could not be generated for this material.'}</p>
+                <AuraButton variant="outline" onClick={() => window.location.reload()}>Retry Planning</AuraButton>
             </div>
         );
     }
@@ -70,119 +101,103 @@ export default function SimulationPlayer({ materialId }: { materialId: string })
     const isFirst = currentStep === 0;
     const isLast = currentStep === data.steps.length - 1;
 
-    const renderVisual = () => {
-        const { type, elements } = data.visual_structure;
-        const highlightedIds = step.elements_to_highlight || [];
-        
-        return (
-            <div style={{ 
-                display: 'flex', 
-                gap: '1rem', 
-                flexWrap: 'wrap', 
-                justifyContent: 'center',
-                alignItems: 'center',
-                minHeight: '200px'
-            }}>
-                {elements.map((el) => {
-                    const isHighlighted = highlightedIds.includes(el.id);
-                    return (
-                        <motion.div
-                            key={el.id}
-                            layout
-                            animate={{
-                                scale: isHighlighted ? 1.1 : 1,
-                                boxShadow: isHighlighted ? '0 0 20px rgba(124, 58, 237, 0.4)' : '0 2px 8px rgba(0,0,0,0.05)',
-                                borderColor: isHighlighted ? 'var(--primary)' : 'var(--border)',
-                                borderStyle: isHighlighted ? 'solid' : 'dashed',
-                            }}
-                            className={`sim-element-box ${isHighlighted ? 'active' : ''}`}
-                            style={{
-                                padding: '0.75rem 1.25rem',
-                                borderRadius: type === 'molecular' || type === 'graph' ? '50%' : '10px',
-                                background: isHighlighted ? 'var(--pastel-sky)' : 'var(--surface)',
-                                color: 'var(--text)',
-                                fontWeight: 700,
-                                border: '1px solid var(--border)',
-                                fontSize: '0.85rem'
-                            }}
-                        >
-                            {el.label}
-                        </motion.div>
-                    );
-                })}
-            </div>
-        );
-    };
-
     return (
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="sim-player">
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="sim-player premium-shadow rounded-2xl p-6 bg-surface/30 backdrop-blur-sm border border-border">
+            {/* Header */}
             <div style={{ marginBottom: '1.5rem' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <div>
-                        <span className="tag-badge" style={{ marginBottom: '0.5rem', background: 'var(--pastel-sky)', color: 'var(--primary)' }}>
-                            {data.domain || 'General Learning'}
+                        <span className="tag-badge bg-primary/10 text-primary px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest mb-2 inline-block">
+                            {data.domain} • {data.simulation_type}
                         </span>
-                        <h2 style={{ fontFamily: 'Outfit', fontWeight: 800, color: 'var(--text)', fontSize: '1.4rem' }}>{data.title}</h2>
+                        <h2 style={{ fontFamily: 'Outfit', fontWeight: 900, color: 'var(--text)', fontSize: '1.6rem', letterSpacing: '-0.02em' }}>{data.title}</h2>
                     </div>
-                    <div style={{ textAlign: 'right', fontSize: '0.8rem', color: 'var(--muted)', fontWeight: 600, fontFamily: 'JetBrains Mono' }}>
-                        STEP {currentStep + 1} / {data.steps.length}
+                    <div style={{ textAlign: 'right', fontSize: '0.9rem', color: 'var(--muted)', fontWeight: 700, fontFamily: 'JetBrains Mono' }}>
+                        <span className="text-primary">{currentStep + 1}</span> / {data.steps.length}
                     </div>
                 </div>
-                <p style={{ color: 'var(--muted)', fontSize: '0.9rem', marginTop: '0.3rem' }}>{data.concept_summary}</p>
+                <p style={{ color: 'var(--muted)', fontSize: '0.95rem', marginTop: '0.5rem', fontWeight: 500 }}>{data.concept_summary}</p>
             </div>
 
-            <div className="sim-canvas">
+            {/* Renderer Canvas */}
+            <div className="sim-canvas bg-bg/20 rounded-xl p-4 border border-border/50 relative">
                 <AnimatePresence mode="wait">
                     <motion.div
                         key={currentStep}
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 1.05 }}
-                        transition={{ duration: 0.3 }}
-                        style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.4 }}
+                        style={{ width: '100%' }}
                     >
-                        {renderVisual()}
+                        {renderSelectedRenderer()}
                     </motion.div>
                 </AnimatePresence>
             </div>
 
-            <div className="sim-narration">
-                <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}>
-                    <div style={{ fontSize: '1.2rem' }}>💡</div>
+            {/* Narration Drawer */}
+            <div className="sim-narration mt-6 p-5 bg-surface/50 rounded-xl border-l-4 border-primary shadow-sm hover:shadow-md transition-shadow duration-300">
+                <div style={{ display: 'flex', gap: '1rem', alignItems: 'flex-start' }}>
+                    <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center text-xl shadow-inner">💡</div>
                     <div style={{ flex: 1 }}>
-                        <div style={{ fontWeight: 800, fontSize: '0.75rem', color: 'var(--primary)', textTransform: 'uppercase', marginBottom: '0.2rem' }}>{step.step_title}</div>
-                        <div style={{ fontWeight: 500, lineHeight: 1.6 }}>{step.narration}</div>
+                        <div style={{ fontWeight: 900, fontSize: '0.8rem', color: 'var(--primary)', textTransform: 'uppercase', marginBottom: '0.4rem', letterSpacing: '0.05em' }}>
+                            {step.step_title}
+                        </div>
+                        <div style={{ fontWeight: 600, lineHeight: 1.7, fontSize: '1rem', color: 'var(--text)' }}>
+                            {step.narration}
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <div className="sim-progress">
-                <div 
-                    className="sim-progress-bar" 
-                    style={{ width: `${((currentStep + 1) / data.steps.length) * 100}%` }} 
-                />
-            </div>
-
-            <div className="sim-controls">
-                <button onClick={() => setCurrentStep(0)} disabled={isFirst}>
-                    Beginning
-                </button>
-                <div style={{ display: 'flex', gap: '0.5rem' }}>
-                    <button onClick={() => setCurrentStep(prev => Math.max(0, prev - 1))} disabled={isFirst}>
-                        ← Back
-                    </button>
-                    <button 
-                        onClick={() => setCurrentStep(prev => Math.min(data.steps.length - 1, prev + 1))} 
-                        disabled={isLast} 
-                        style={{ background: 'var(--primary)', color: 'var(--surface)', border: 'none' }}
-                    >
-                        Next Step →
-                    </button>
+            {/* Progress & Controls */}
+            <div className="mt-8">
+                <div className="bg-border/20 h-1.5 w-full rounded-full overflow-hidden mb-6">
+                    <motion.div 
+                        className="h-full bg-gradient-to-r from-primary to-secondary" 
+                        animate={{ width: `${((currentStep + 1) / data.steps.length) * 100}%` }}
+                    />
                 </div>
-                <button onClick={() => setCurrentStep(data.steps.length - 1)} disabled={isLast}>
-                    End
-                </button>
+
+                <div className="flex justify-between items-center gap-4">
+                    <AuraButton 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={() => setCurrentStep(0)} 
+                        disabled={isFirst}
+                    >
+                        ⏮ Reset
+                    </AuraButton>
+                    
+                    <div style={{ display: 'flex', gap: '0.75rem' }}>
+                        <AuraButton 
+                            variant="outline" 
+                            onClick={() => setCurrentStep(prev => Math.max(0, prev - 1))} 
+                            disabled={isFirst}
+                        >
+                            ← Prev
+                        </AuraButton>
+                        <AuraButton 
+                            variant="primary" 
+                            className="min-w-[140px]"
+                            onClick={() => setCurrentStep(prev => Math.min(data.steps.length - 1, prev + 1))} 
+                            disabled={isLast} 
+                        >
+                            {isLast ? 'Complete' : 'Next Step →'}
+                        </AuraButton>
+                    </div>
+
+                    <AuraButton 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={() => setCurrentStep(data.steps.length - 1)} 
+                        disabled={isLast}
+                    >
+                        ⏭ Finish
+                    </AuraButton>
+                </div>
             </div>
         </motion.div>
     );
 }
+

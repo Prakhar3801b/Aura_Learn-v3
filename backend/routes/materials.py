@@ -309,7 +309,7 @@ class BatchDeleteRequest(BaseModel):
     material_ids: List[str]
     user_id: str
 
-@router.delete("/batch")
+@router.post("/batch/delete")
 async def delete_materials_batch(request: BatchDeleteRequest):
     """Batch delete study materials."""
     supabase = get_supabase()

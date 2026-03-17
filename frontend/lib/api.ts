@@ -103,8 +103,8 @@ export const deleteMaterial = async (materialId: string, userId: string) => {
 };
 
 export const deleteMaterialsBatch = async (materialIds: string[], userId: string) => {
-    return fetchAPI(`/materials/batch`, {
-        method: 'DELETE',
+    return fetchAPI(`/materials/batch/delete`, {
+        method: 'POST',
         body: JSON.stringify({ material_ids: materialIds, user_id: userId })
     });
 };

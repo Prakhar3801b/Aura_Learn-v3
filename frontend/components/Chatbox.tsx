@@ -198,10 +198,24 @@ export default function Chatbox({ materialId: initialId, materialTitle: initialT
 
                 {/* Input Overlay */}
                 <div className="chat-input-area" style={{ padding: '1rem', borderTop: '1px solid var(--border)' }}>
-                    <div className="chat-input-wrapper" style={{ display: 'flex', gap: '0.5rem', background: 'var(--input-bg)', padding: '0.5rem 0.75rem', border: '1px solid var(--border)', borderRadius: '12px' }}>
+                    <div className="chat-input-wrapper" style={{ 
+                        display: 'flex', 
+                        gap: '0.5rem', 
+                        background: 'var(--input-bg)', 
+                        padding: '0.5rem 0.75rem', 
+                        border: '1px solid var(--border)', 
+                        borderRadius: '12px' 
+                    }}>
                         <input
                             className="chat-input"
-                            style={{ flex: 1, border: 'none', background: 'transparent', outline: 'none', color: 'var(--text)', fontSize: '0.9rem' }}
+                            style={{ 
+                                flex: 1, 
+                                border: 'none', 
+                                background: 'transparent', 
+                                outline: 'none', 
+                                color: 'var(--text)', 
+                                fontSize: '0.9rem' 
+                            }}
                             value={input}
                             onChange={(e) => setInput(e.target.value)}
                             onKeyDown={(e) => e.key === 'Enter' && handleSend()}
@@ -212,9 +226,15 @@ export default function Chatbox({ materialId: initialId, materialTitle: initialT
                             onClick={handleSend}
                             disabled={!input.trim() || loading}
                             style={{ 
-                                background: 'var(--primary)', color: 'white', border: 'none', 
-                                borderRadius: '8px', padding: '0.4rem 0.8rem', cursor: 'pointer',
-                                opacity: input.trim() ? 1 : 0.4
+                                background: input.trim() ? 'var(--accent)' : 'var(--muted)', 
+                                color: 'var(--bg)', 
+                                border: 'none', 
+                                borderRadius: '8px', 
+                                padding: '0.4rem 0.8rem', 
+                                cursor: 'pointer',
+                                opacity: input.trim() ? 1 : 0.4,
+                                transition: 'all 0.2s ease',
+                                fontWeight: 700
                             }}
                         >
                             ➔

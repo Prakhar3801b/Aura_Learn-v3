@@ -88,11 +88,12 @@ STUDY MATERIAL CONTEXT:
 STUDENT QUESTION: {question}
 
 INSTRUCTIONS:
-1. Use professional Markdown formatting (Headers, Bullet points, Bold text).
-2. Start with a direct answer.
-3. Break complex concepts into digestible points.
-4. If the context is insufficient, state it clearly but try to be helpful based on general knowledge if possible.
-5. maintain a concise yet comprehensive tone.
+1. **Formatting**: Use high-quality professional Markdown. Use `###` for sub-headers. Use **bolding** for emphasis.
+2. **Structure**: Start with a concise direct answer in one sentence.
+3. **Hierarchy**: Use bullet points or numbered lists for all complex explanations. 
+4. **Spacing**: Use DOUBLE NEWLINES between every paragraph and major point to ensure the UI has room to breathe. Avoid congested blocks of text.
+5. **Tone**: Be helpful, insightful, and elite. If a concept is complex, use an analogy or step-by-step breakdown.
+6. **Constraint**: If the context doesn't have the answer, use your general knowledge but mention it's based on general principles.
 
 Answer:"""
 

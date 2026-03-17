@@ -75,8 +75,9 @@ function buildFlowEdges(rawEdges: any[]): Edge[] {
         source: e.source,
         target: e.target,
         label: e.label,
-        style: { stroke: '#E8E2DA', strokeWidth: 2 },
-        labelStyle: { fill: '#7C7C8A', fontSize: 10 },
+        style: { stroke: 'var(--border)', strokeWidth: 2 },
+        labelStyle: { fill: 'var(--muted)', fontSize: 10, fontWeight: 500 },
+        labelBgStyle: { fill: 'var(--surface)', fillOpacity: 0.8 },
     }));
 }
 

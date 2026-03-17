@@ -66,11 +66,12 @@ function buildFlowEdges(rawEdges: any[]): Edge[] {
         target: e.target,
         label: e.label,
         animated: true,
-        style: { stroke: '#CBD5E1', strokeWidth: 1.5 },
-        labelStyle: { fill: '#94A3B8', fontSize: 9, fontWeight: 500 },
+        style: { stroke: 'var(--border)', strokeWidth: 1.5 },
+        labelStyle: { fill: 'var(--muted)', fontSize: 9, fontWeight: 500 },
+        labelBgStyle: { fill: 'var(--surface)', fillOpacity: 0.8 },
         markerEnd: {
             type: MarkerType.ArrowClosed,
-            color: '#CBD5E1',
+            color: 'var(--border)',
         },
     }));
 }
@@ -123,15 +124,15 @@ export default function ConceptGraph({ nodes: rawNodes, edges: rawEdges, onNodeC
                 fitView
                 attributionPosition="bottom-right"
             >
-                <Controls style={{ background: '#FFFFFF', border: '1px solid #E8E2DA', borderRadius: '8px' }} />
+                <Controls style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '8px', color: 'var(--text)' }} />
                 <MiniMap
-                    style={{ background: '#FFFFFF', border: '1px solid #E8E2DA', borderRadius: '8px' }}
+                    style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '8px' }}
                     nodeColor={(n) => {
                         const raw = rawNodes.find((r) => r.id === n.id);
                         return raw?.node_type === 'relation' ? '#F59E0B' : '#7C3AED';
                     }}
                 />
-                <Background color="#F1F5F9" gap={25} size={1} />
+                <Background color="var(--border)" gap={25} size={1} />
             </ReactFlow>
         </div>
     );

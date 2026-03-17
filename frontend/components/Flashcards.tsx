@@ -35,7 +35,7 @@ export default function Flashcards({ flashcards, onConfidenceUpdate }: Flashcard
                             width: i === currentIndex ? '16px' : '6px',
                             height: '6px',
                             borderRadius: '99px',
-                            background: i === currentIndex ? '#1A1A2E' : '#E8E2DA',
+                            background: i === currentIndex ? 'var(--primary)' : 'var(--border)',
                             transition: 'all 0.3s ease',
                         }} />
                     ))}
@@ -61,8 +61,8 @@ export default function Flashcards({ flashcards, onConfidenceUpdate }: Flashcard
                                 position: 'absolute', inset: 0, backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden',
                                 padding: '2rem', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center',
                             }}>
-                                <div style={{ color: '#1A1A2E', fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '0.6rem' }}>QUESTION</div>
-                                <p style={{ color: '#1A1A2E', fontSize: '1rem', lineHeight: 1.7, fontWeight: 500 }}>{card.question}</p>
+                                <div style={{ color: 'var(--primary)', opacity: 0.7, fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '0.6rem' }}>QUESTION</div>
+                                <p style={{ color: 'var(--text)', fontSize: '1rem', lineHeight: 1.7, fontWeight: 500 }}>{card.question}</p>
                                 <div style={{ color: '#7C7C8A', fontSize: '0.72rem', marginTop: '1rem' }}>Tap to reveal</div>
                             </div>
                             {/* Back */}

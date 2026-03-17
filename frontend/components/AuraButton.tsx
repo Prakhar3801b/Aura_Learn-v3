@@ -27,14 +27,14 @@ export function AuraButton({
 
     const variantStyles: Record<string, React.CSSProperties> = {
         primary: {
-            background: '#1A1A2E',
-            color: '#fff',
+            background: 'var(--primary)',
+            color: 'var(--bg)',
             border: 'none',
         },
         outline: {
-            background: active ? 'rgba(26, 26, 46, 0.06)' : 'transparent',
-            color: '#1A1A2E',
-            border: active ? '1px solid #1A1A2E' : '1px solid #E8E2DA',
+            background: active ? 'var(--hover-overlay)' : 'transparent',
+            color: 'var(--primary)',
+            border: active ? '1px solid var(--primary)' : '1px solid var(--border)',
         },
         success: {
             background: '#D4F5E9',

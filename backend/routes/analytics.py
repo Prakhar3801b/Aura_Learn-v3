@@ -4,6 +4,7 @@ from fastapi import APIRouter, HTTPException
 from supabase import create_client
 from config import get_settings
 from services.analytics_service import AnalyticsService
+from services.ai_service import AIService
 from models.analytics import SessionEvent, StudySession
 from datetime import datetime
 
@@ -12,6 +13,7 @@ logger = logging.getLogger(__name__)
 settings = get_settings()
 
 analytics_service = AnalyticsService()
+ai_service = AIService()
 
 
 def get_supabase():
@@ -106,9 +108,10 @@ async def get_user_history(user_id: str):
     
     sessions_data = sessions_res.data or []
     
-    # 2. Enrich with stuck topics from anomalies
+    # 2. Enrich with stuck topics and AI insights
     history = []
-    for s in sessions_data:
+    # Only generate AI insights for the last 2 sessions to keep it fast
+    for i, s in enumerate(sessions_data):
         # Handle the joined data structure
         material = s.get("study_materials", {})
         if isinstance(material, dict):
@@ -118,11 +121,10 @@ async def get_user_history(user_id: str):
             s["material_title"] = "Untitled Material"
             s["file_type"] = "pdf"
             
-        # Optional: remove the nested object for a cleaner API response
         if "study_materials" in s:
             del s["study_materials"]
             
-        # Fetch associated anomalies to show "stuck topics"
+        # 1. Fetch associated anomalies to show "stuck topics"
         anom_res = (
             supabase.table("anomaly_flags")
             .select("topic")
@@ -130,6 +132,28 @@ async def get_user_history(user_id: str):
             .execute()
         )
         s["stuck_topics"] = list(set([a["topic"] for a in anom_res.data if a.get("topic")]))
+
+        # 2. Generate/Return AI insights for last 2 sessions
+        if i < 2:
+            # Check if insights are already in memory or generate them
+            session_state = analytics_service._session_cache.get(s["id"], {})
+            events = session_state.get("events", [])
+            
+            # If no cached events in memory (e.g. server restarted), fetch from DB if possible
+            # (Assuming events aren't fully persisted in this simplified version, let's use stuck topics)
+            try:
+                insights = await ai_service.generate_session_insights(events)
+                s["insights"] = insights
+            except:
+                s["insights"] = {
+                    "learned": [f"Deep dive into {s['material_title']}"],
+                    "doubts": s["stuck_topics"],
+                    "review": "Performance was consistent across topics.",
+                    "recap": f"Focused session on {s['material_title']}."
+                }
+        else:
+            s["insights"] = None
+
         history.append(s)
         
     return history

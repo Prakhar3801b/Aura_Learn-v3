@@ -180,7 +180,7 @@ export default function StudyPage({ params }: { params: Promise<{ id: string }> 
                 <motion.div
                     animate={{ rotate: 360 }}
                     transition={{ repeat: Infinity, duration: 2, ease: "linear" }}
-                    style={{ width: '50px', height: '50px', borderRadius: '50%', border: '3px solid #E8E2DA', borderTop: '3px solid #1A1A2E', margin: '0 auto 1.5rem' }}
+                    style={{ width: '50px', height: '50px', borderRadius: '50%', border: '3px solid var(--border)', borderTop: '3px solid var(--primary)', margin: '0 auto 1.5rem' }}
                 />
                 <h2 style={{ color: 'var(--text)', fontSize: '1.4rem', fontWeight: 700, marginBottom: '0.75rem' }}>
                     {status === 'processing' ? 'AI is analyzing your notes...' : 'Preparing study session...'}

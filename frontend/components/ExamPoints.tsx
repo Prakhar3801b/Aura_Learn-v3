@@ -29,7 +29,7 @@ export default function ExamPoints({ examPoints }: ExamPointsProps) {
 
     if (!sortedPoints.length) {
         return (
-            <div style={{ textAlign: 'center', padding: '3rem', color: '#7C7C8A' }}>
+            <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--muted)' }}>
                 <div style={{ fontSize: '2.5rem', marginBottom: '0.75rem' }}>🎯</div>
                 <p>No exam points generated yet.</p>
             </div>
@@ -41,21 +41,21 @@ export default function ExamPoints({ examPoints }: ExamPointsProps) {
             <div style={{
                 display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem',
             }}>
-                <span style={{ color: '#7C7C8A', fontSize: '0.78rem' }}>
+                <span style={{ color: 'var(--muted)', fontSize: '0.78rem' }}>
                     {sortedPoints.length} exam points (Sorted by Importance)
                 </span>
                 <button
                     onClick={handleExport}
                     className="no-print"
                     style={{
-                        background: '#FAF7F2',
-                        border: '1px solid #E8E2DA',
+                        background: 'var(--bg)',
+                        border: '1px solid var(--border)',
                         borderRadius: '8px',
                         padding: '0.4rem 0.8rem',
                         fontSize: '0.75rem',
                         fontWeight: 600,
                         cursor: 'pointer',
-                        color: '#1A1A2E'
+                        color: 'var(--text)'
                     }}
                 >
                     💾 Export sheet
@@ -81,8 +81,8 @@ export default function ExamPoints({ examPoints }: ExamPointsProps) {
                             <span style={{
                                 fontSize: '0.7rem',
                                 fontWeight: 700,
-                                color: '#7C7C8A',
-                                background: '#F3F0EB',
+                                color: 'var(--muted)',
+                                background: 'var(--input-bg)',
                                 borderRadius: '6px',
                                 padding: '0.2rem 0.45rem',
                                 flexShrink: 0,
@@ -108,7 +108,7 @@ export default function ExamPoints({ examPoints }: ExamPointsProps) {
                                         </span>
                                     )}
                                 </div>
-                                <p style={{ color: '#1A1A2E', fontSize: '0.88rem', lineHeight: 1.6, fontWeight: 500 }}>
+                                <p style={{ color: 'var(--text)', fontSize: '0.88rem', lineHeight: 1.6, fontWeight: 500 }}>
                                     {ep.point}
                                 </p>
 
@@ -118,9 +118,9 @@ export default function ExamPoints({ examPoints }: ExamPointsProps) {
                                             initial={{ opacity: 0, height: 0 }}
                                             animate={{ opacity: 1, height: 'auto' }}
                                             exit={{ opacity: 0, height: 0 }}
-                                            style={{ marginTop: '0.75rem', paddingTop: '0.75rem', borderTop: '1px solid #E8E2DA' }}
+                                            style={{ marginTop: '0.75rem', paddingTop: '0.75rem', borderTop: '1px solid var(--border)' }}
                                         >
-                                            <p style={{ color: '#7C7C8A', fontSize: '0.82rem', lineHeight: 1.6 }}>
+                                            <p style={{ color: 'var(--muted)', fontSize: '0.82rem', lineHeight: 1.6 }}>
                                                 {ep.explanation}
                                             </p>
                                         </motion.div>

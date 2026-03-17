@@ -156,6 +156,19 @@ Return ONLY valid JSON with this exact structure:
 
 Create 5-10 logical steps that clearly demonstrate the concept."""
 
+SESSION_INSIGHTS_PROMPT = """You are an AI study coach. Analyze this student's study session events and provide structured insights.
+
+Session Events:
+{events}
+
+Return ONLY valid JSON with exactly this structure:
+{{
+  "learned": ["...", "..."],
+  "doubts": ["...", "..."],
+  "review": "A brief AI analysis of performance and focus.",
+  "recap": "A 1-2 sentence quick summary of the entire session."
+}}"""
+
 
 class AIService:
     """LLM orchestration using Groq (Llama 3) to generate study outputs."""
@@ -323,6 +336,25 @@ class AIService:
     async def generate_practical_challenge(self, text: str) -> Dict[str, Any]:
         """Generate a practical challenge/scenario from text."""
         prompt = PRACTICAL_EXERCISE_PROMPT.format(text=text[:6000])
+        raw = self._chat(prompt)
+        return self._safe_json_parse(raw)
+
+    async def generate_session_insights(self, events: List[Dict]) -> Dict[str, Any]:
+        """Synthesize session events into a study review."""
+        if not events:
+            return {
+                "learned": ["Started a session"],
+                "doubts": [],
+                "review": "Not enough activity to generate a detailed review yet.",
+                "recap": "A short introductory session."
+            }
+        
+        # Simplify events for the prompt
+        event_summary = [
+            {"type": e.get("event_type"), "topic": e.get("topic"), "time": e.get("timestamp")}
+            for e in events[:50]  # limit to 50 events
+        ]
+        prompt = SESSION_INSIGHTS_PROMPT.format(events=json.dumps(event_summary))
         raw = self._chat(prompt)
         return self._safe_json_parse(raw)
 

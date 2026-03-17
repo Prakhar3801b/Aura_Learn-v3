@@ -19,7 +19,7 @@ export default function Chatbox({ materialId: initialId, materialTitle: initialT
     const [messages, setMessages] = useState<Message[]>([]);
     const [input, setInput] = useState('');
     const [loading, setLoading] = useState(false);
-    const [isCollapsed, setIsCollapsed] = useState(true);
+    const [isCollapsed, setIsCollapsed] = useState(false);
     const [activeMaterialId, setActiveMaterialId] = useState<string | undefined>(initialId);
     const [activeMaterialTitle, setActiveMaterialTitle] = useState<string | undefined>(initialTitle);
     const scrollRef = useRef<HTMLDivElement>(null);
@@ -108,44 +108,21 @@ export default function Chatbox({ materialId: initialId, materialTitle: initialT
 
     if (isCollapsed) {
         return (
-            <motion.div
-                layoutId="chat-box"
-                initial={{ scale: 0.8, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
+            <div 
+                className="chat-sidebar collapsed"
+                style={{ width: '40px', cursor: 'pointer', background: 'var(--surface)', borderLeft: '1px solid var(--border)', justifyContent: 'center', alignItems: 'center', display: 'flex', height: '100vh', position: 'fixed', right: 0, top: 0, zIndex: 40 }}
                 onClick={() => setIsCollapsed(false)}
-                className="chat-bubble-toggle"
-                style={{
-                    width: '60px', height: '60px', borderRadius: '30px',
-                    background: 'var(--primary)', color: 'white',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    cursor: 'pointer', boxShadow: '0 8px 32px rgba(0,0,0,0.15)',
-                    position: 'absolute', bottom: '2rem', right: '1.5rem',
-                    zIndex: 100, fontSize: '1.5rem'
-                }}
             >
-                ✨
-            </motion.div>
+                <div style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)', fontWeight: 700, color: 'var(--muted)', fontSize: '0.75rem', letterSpacing: '0.1em' }}>
+                    AURA ASSISTANT
+                </div>
+                <div style={{ position: 'absolute', top: '1.25rem', color: 'var(--primary)' }}>✨</div>
+            </div>
         );
     }
 
     return (
-        <motion.div
-            layoutId="chat-box"
-            initial={{ x: 20, opacity: 0 }}
-            animate={{ x: 0, opacity: 1 }}
-            className="card chat-container"
-            style={{
-                height: '100%',
-                display: 'flex',
-                flexDirection: 'column',
-                padding: 0,
-                overflow: 'hidden',
-                position: 'relative',
-                border: 'none',
-                boxShadow: 'none',
-                background: 'transparent'
-            }}
-        >
+        <div className="chat-sidebar">
             {/* Header */}
             <div style={{
                 padding: '1.25rem',
@@ -210,9 +187,9 @@ export default function Chatbox({ materialId: initialId, materialTitle: initialT
                 )}
             </div>
 
-            {/* Input */}
+            {/* Input Overlay */}
             <div className="chat-input-area" style={{ padding: '1rem', borderTop: '1px solid var(--border)' }}>
-                <div className="chat-input-wrapper" style={{ display: 'flex', gap: '0.5rem', background: 'var(--input-bg)', padding: '0.5rem 0.75rem', borderRadius: '12px' }}>
+                <div className="chat-input-wrapper" style={{ display: 'flex', gap: '0.5rem', background: 'var(--input-bg)', padding: '0.5rem 0.75rem', border: '1px solid var(--border)', borderRadius: '12px' }}>
                     <input
                         className="chat-input"
                         style={{ flex: 1, border: 'none', background: 'transparent', outline: 'none', color: 'var(--text)', fontSize: '0.9rem' }}
@@ -235,6 +212,6 @@ export default function Chatbox({ materialId: initialId, materialTitle: initialT
                     </button>
                 </div>
             </div>
-        </motion.div>
+        </div>
     );
 }

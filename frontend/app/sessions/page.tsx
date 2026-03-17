@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { getUserSessionHistory } from '@/lib/api';
 import { supabase } from '@/lib/supabase';
 import { AuraButton } from '@/components/AuraButton';

@@ -63,8 +63,6 @@ const features = [
     title: 'AI Mind Maps',
     description: 'Automatically generate interactive concept maps from any study material',
     category: 'AI Study',
-    rating: '4.8',
-    students: '9,530',
     href: '/dashboard',
     color: 'card-pastel-rose',
     icon: '🧠',
@@ -73,8 +71,6 @@ const features = [
     title: 'Predictive Flashcards',
     description: 'Smart spaced-repetition flashcards powered by AI analysis',
     category: 'Smart Study',
-    rating: '4.9',
-    students: '7,245',
     href: '/dashboard',
     color: 'card-pastel-peach',
     icon: '⚡',
@@ -83,8 +79,6 @@ const features = [
     title: 'Exam Point Extraction',
     description: 'AI identifies the most likely exam questions from your notes',
     category: 'Output Driven',
-    rating: '4.9',
-    students: '6,726',
     href: '/dashboard',
     color: 'card-pastel-mint',
     icon: '🎯',
@@ -93,8 +87,6 @@ const features = [
     title: 'WebXR AR Labs',
     description: 'Interactive 3D science experiments right from your phone browser',
     category: 'AR / VR',
-    rating: '5.0',
-    students: '8,735',
     href: '/ar-labs',
     color: 'card-pastel-lavender',
     icon: '🥽',
@@ -223,10 +215,7 @@ export default function LandingPage() {
                     <span style={{ fontSize: '1rem' }}>{f.icon}</span>
                     {f.category}
                   </div>
-                  <div className="feature-rating">
-                    <span style={{ color: '#E07B5A' }}>★</span>
-                    {f.rating}
-                  </div>
+
                 </div>
 
                 {/* Title */}
@@ -243,7 +232,7 @@ export default function LandingPage() {
 
                 {/* Footer */}
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <span className="feature-meta">{f.students} students</span>
+
                   {f.badge && (
                     <span style={{
                       background: 'rgba(255,255,255,0.3)',

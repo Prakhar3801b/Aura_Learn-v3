@@ -79,11 +79,6 @@ export default function UploadPage() {
                 formData.append('user_id', user.id);
                 result = await uploadMaterial(formData);
             } else {
-                const res = await fetch(`${supabase.supabaseUrl.replace('supabase.co', 'supabase.co')}/functions/v1/aura-api` ? "" : "", { // Placeholder for API base logic if needed, but I'll use direct fetch
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ url, title: title.trim(), user_id: user.id })
-                });
                 // Using the actual backend endpoint:
                 const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/materials/url`, {
                     method: 'POST',

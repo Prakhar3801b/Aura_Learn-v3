@@ -26,13 +26,29 @@ class URLProcessingService:
 
     async def _process_youtube(self, url: str) -> Dict[str, Any]:
         """Extract transcript or metadata from YouTube."""
-        # Note: In a real production environment, you'd use youtube-transcript-api 
-        # or a similar library. For now, we'll simulate the extraction.
-        # If we can't get a transcript, we'll try to find any descriptive text.
         logger.info(f"Processing YouTube URL: {url}")
         
-        # Placeholder for transcript extraction logic
-        # For now, return a mockup or try to scrape the title/description
+        # Extract video ID
+        video_id = None
+        if "v=" in url:
+            video_id = url.split("v=")[1].split("&")[0]
+        elif "youtu.be/" in url:
+            video_id = url.split("youtu.be/")[1].split("?")[0]
+            
+        if video_id:
+            try:
+                from youtube_transcript_api import YouTubeTranscriptApi
+                transcript = YouTubeTranscriptApi.get_transcript(video_id)
+                text = " ".join([t['text'] for t in transcript])
+                return {
+                    "text": text,
+                    "file_type": "video",
+                    "title": f"YouTube Transcript ({video_id})"
+                }
+            except Exception as e:
+                logger.warning(f"Transcript extraction failed for {video_id}: {e}. Falling back to web scraping.")
+        
+        # Fallback to generic web scraping (titles/descriptions)
         try:
             loader = WebBaseLoader(url)
             docs = loader.load()
@@ -40,10 +56,10 @@ class URLProcessingService:
             return {
                 "text": text,
                 "file_type": "video",
-                "title": "YouTube Video Content"
+                "title": "YouTube Video (Meta Data)"
             }
         except Exception as e:
-            logger.error(f"YouTube processing failed: {e}")
+            logger.error(f"YouTube fallback processing failed: {e}")
             raise
 
     async def _process_generic_web(self, url: str) -> Dict[str, Any]:

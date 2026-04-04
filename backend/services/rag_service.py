@@ -17,11 +17,27 @@ class RAGService:
         self.ai_service = AIService()
 
     async def get_material_text(self, material_id: str) -> str:
-        """Fetch all text chunks for a material to provide full context."""
+        """Fetch all text chunks for a material to provide full context. Fall back to storage if chunks not ready."""
         try:
+            # 1. Try DB Chunks (preferred for performance)
             res = self.supabase.table("material_chunks").select("text").eq("material_id", material_id).order("chunk_index").execute()
             chunks = res.data or []
-            return "\n".join([c["text"] for c in chunks])
+            if chunks:
+                return "\n".join([c["text"] for c in chunks])
+            
+            # 2. Fallback to Storage (if chunks haven't been processed yet)
+            mat_res = self.supabase.table("study_materials").select("user_id, file_type").eq("id", material_id).single().execute()
+            if mat_res.data:
+                user_id = mat_res.data["user_id"]
+                # URL materials store text in extracted_content.txt
+                storage_path = f"{user_id}/{material_id}/extracted_content.txt"
+                try:
+                    text_res = self.supabase.storage.from_("study-materials").download(storage_path)
+                    return text_res.decode("utf-8")
+                except:
+                    pass # Original file might be PDF/Image/Video, not extracted_content.txt
+            
+            return ""
         except Exception as e:
             logger.error(f"Failed to fetch material text: {e}")
             return ""

@@ -75,11 +75,20 @@ async def process_material_background(
                 text = result["text"]
                 transcript_segments = result["segments"]
         else:
-            # If no bytes, it's a URL-based material and text should already be in DB or fetched here
-            mat = supabase.table("study_materials").select("text").eq("id", material_id).single().execute()
-            text = mat.data.get("text", "")
-            if not text:
-                # Handle cases where URL needs re-scraping
+            # If no bytes, it's a URL-based material. We stored the extracted text in Storage as extracted_content.txt
+            try:
+                # Get user_id to build the storage path
+                mat_res = supabase.table("study_materials").select("user_id").eq("id", material_id).single().execute()
+                user_id = mat_res.data.get("user_id")
+                if not user_id:
+                    raise ValueError(f"Could not find user_id for material {material_id}")
+                
+                storage_path = f"{user_id}/{material_id}/extracted_content.txt"
+                text_res = supabase.storage.from_("study-materials").download(storage_path)
+                text = text_res.decode("utf-8")
+            except Exception as e:
+                logger.error(f"Failed to fetch content from storage for URL material {material_id}: {e}")
+                # Fallback to re-scraping if possible
                 url_res = supabase.table("study_materials").select("file_url").eq("id", material_id).single().execute()
                 url = url_res.data.get("file_url")
                 if url:
@@ -398,19 +407,23 @@ async def upload_url(request: URLUploadRequest, background_tasks: BackgroundTask
     try:
         text_bytes = text.encode("utf-8")
         storage_path = f"{request.user_id}/{material_id}/extracted_content.txt"
+        
+        # 1. Insert metadata row first to avoid foreign key issues or missing rows in background tasks
+        supabase.table("study_materials").insert(row).execute()
+
+        # 2. Upload extracted text to storage
         supabase.storage.from_("study-materials").upload(
             storage_path, text_bytes, {"content-type": "text/plain"}
         )
-        # Update row with the new storage path if needed, but we used the original URL as file_url
-        supabase.table("study_materials").insert(row).execute()
         
-        # Kick off background processing (passing text instead of file_bytes)
+        # 3. Kick off background processing
         background_tasks.add_task(
             process_material_background, material_id, None, file_type, "extracted_content.txt"
         )
     except Exception as e:
         logger.error(f"Failed to save URL material: {e}")
-        raise HTTPException(500, f"Database error: {e}")
+        # Cleanup if row was inserted but storage failed (optional, but keep simple for now)
+        raise HTTPException(500, f"Database/Storage error: {e}")
 
     return MaterialUploadResponse(**row)
 

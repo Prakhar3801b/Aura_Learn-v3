@@ -3,6 +3,8 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { supabase } from '@/lib/supabase';
+import { API_BASE } from '@/lib/api';
 
 const navItems = [
     {
@@ -67,6 +69,18 @@ const bottomItems = [
 export default function Sidebar() {
     const pathname = usePathname();
     const [darkMode, setDarkMode] = useState(false);
+    const [rewards, setRewards] = useState<any>(null);
+
+    useEffect(() => {
+        supabase.auth.getUser().then(({ data }) => {
+            if (data.user) {
+                fetch(`${API_BASE}/rewards/${data.user.id}`)
+                    .then(res => res.json())
+                    .then(setRewards)
+                    .catch(() => {});
+            }
+        });
+    }, []);
 
     useEffect(() => {
         const saved = localStorage.getItem('aura-theme');
@@ -113,6 +127,44 @@ export default function Sidebar() {
                     </Link>
                 ))}
             </div>
+
+            {/* Rewards Display */}
+            {rewards && (
+                <div style={{ marginTop: 'auto', padding: '0 0.5rem', display: 'flex', flexDirection: 'column', gap: '0.5rem', alignItems: 'center', marginBottom: '1rem' }}>
+                    <div style={{ position: 'relative' }}>
+                        <div style={{ 
+                            background: 'rgba(245, 158, 11, 0.1)', 
+                            color: '#F59E0B', 
+                            padding: '4px 8px', 
+                            borderRadius: '12px', 
+                            fontSize: '0.75rem', 
+                            fontWeight: 800,
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '2px',
+                            border: '1px solid rgba(245, 158, 11, 0.2)'
+                        }}>
+                            🔥 {rewards.streak_count}
+                        </div>
+                    </div>
+                    {rewards.badges?.length > 0 && (
+                        <div style={{ 
+                            background: 'rgba(99, 102, 241, 0.1)', 
+                            color: '#6366F1', 
+                            padding: '4px 8px', 
+                            borderRadius: '12px', 
+                            fontSize: '0.75rem', 
+                            fontWeight: 800,
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '2px',
+                            border: '1px solid rgba(99, 102, 241, 0.2)'
+                        }}>
+                            🏅 {rewards.badges.length}
+                        </div>
+                    )}
+                </div>
+            )}
 
             {/* Bottom links */}
             <div className="sidebar-bottom">

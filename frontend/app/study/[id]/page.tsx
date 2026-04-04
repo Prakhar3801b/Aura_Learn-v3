@@ -5,14 +5,14 @@ import { motion, AnimatePresence } from 'framer-motion';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import Flashcards from '@/components/Flashcards';
 import ExamPoints from '@/components/ExamPoints';
 import SimulationPlayer from '@/components/SimulationPlayer';
+import Quiz from '@/components/Quiz';
+import Glossary from '@/components/Glossary';
+import ExternalResources from '@/components/ExternalResources';
 import { 
     getFlashcards, 
     getExamPoints, 
-    getMindMap, 
-    getConceptGraph, 
     getMaterial, 
     updateFlashcardConfidence, 
     startSession, 
@@ -24,12 +24,9 @@ import {
 import { supabase } from '@/lib/supabase';
 import { AuraButton } from '@/components/AuraButton';
 
-const MindMap = dynamic(() => import('@/components/MindMap'), { ssr: false });
-const ConceptGraph = dynamic(() => import('@/components/ConceptGraph'), { ssr: false });
-
 import PracticalWorkshop from '@/components/PracticalWorkshop';
 
-type Panel = 'mindmap' | 'conceptgraph' | 'flashcards' | 'exampoints' | 'practical' | 'simulation';
+type Panel = 'quiz' | 'glossary' | 'flashcards' | 'exampoints' | 'practical' | 'simulation' | 'resources';
 
 export default function StudyPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = use(params);
@@ -37,9 +34,10 @@ export default function StudyPage({ params }: { params: Promise<{ id: string }> 
     const [material, setMaterial] = useState<Material | null>(null);
     const [flashcards, setFlashcards] = useState<any[]>([]);
     const [examPoints, setExamPoints] = useState<any[]>([]);
-    const [mindMap, setMindMap] = useState<any>({ nodes: [], edges: [] });
-    const [conceptGraph, setConceptGraph] = useState<any>({ nodes: [], edges: [] });
-    const [activePanel, setActivePanel] = useState<Panel>('mindmap');
+    const [quiz, setQuiz] = useState<any[]>([]);
+    const [glossary, setGlossary] = useState<any[]>([]);
+    const [resources, setResources] = useState<any>(null);
+    const [activePanel, setActivePanel] = useState<Panel>('flashcards');
     const [selectedNode, setSelectedNode] = useState<any>(null);
     const [sessionId, setSessionId] = useState<string>('');
     const [loading, setLoading] = useState(true);
@@ -58,16 +56,26 @@ export default function StudyPage({ params }: { params: Promise<{ id: string }> 
                 if (data?.learning_level) setLearningLevel(data.learning_level);
             }
 
-            const [fcs, eps, mm, cg] = await Promise.all([
+            const [fcs, eps] = await Promise.all([
                 getFlashcards(id),
                 getExamPoints(id),
-                getMindMap(id),
-                getConceptGraph(id)
             ]);
             setFlashcards(fcs);
             setExamPoints(eps);
-            setMindMap(mm);
-            setConceptGraph(cg);
+
+            // Fetch new tools lazily or on demand if needed, but let's do them here for simplicity
+            try {
+                const [q, g, r] = await Promise.all([
+                    fetch(`${API_BASE}/ai/quiz/${id}`).then(res => res.json()),
+                    fetch(`${API_BASE}/ai/glossary/${id}`).then(res => res.json()),
+                    fetch(`${API_BASE}/ai/resources/${id}`).then(res => res.json())
+                ]);
+                setQuiz(q);
+                setGlossary(g);
+                setResources(r);
+            } catch (err) {
+                console.error("Failed to load new study tools:", err);
+            }
 
             if (user && !sessionId) {
                 const session = await startSession(user.id, id);
@@ -155,12 +163,13 @@ export default function StudyPage({ params }: { params: Promise<{ id: string }> 
     };
 
     const panels: { id: Panel; label: string; icon: string }[] = [
-        { id: 'mindmap', label: 'Mind Map', icon: '🧠' },
-        { id: 'conceptgraph', label: 'Concept Graph', icon: '🕸️' },
-        { id: 'simulation', label: 'Simulation', icon: '🎬' },
         { id: 'flashcards', label: `Flashcards (${flashcards.length})`, icon: '⚡' },
+        { id: 'quiz', label: 'Active Recall Quiz', icon: '📝' },
+        { id: 'glossary', label: 'Key Concepts', icon: '📚' },
+        { id: 'simulation', label: 'Simulation', icon: '🎬' },
         { id: 'exampoints', label: `Revision Sheet (${examPoints.length})`, icon: '📜' },
         { id: 'practical', label: 'Practical Workshop', icon: '🛠️' },
+        { id: 'resources', label: 'Related Resources', icon: '🌐' },
     ];
 
     const handleReprocess = async () => {
@@ -220,7 +229,7 @@ export default function StudyPage({ params }: { params: Promise<{ id: string }> 
                             </div>
                         </div>
                         <p style={{ color: 'var(--muted)', fontSize: '0.75rem' }}>
-                            {flashcards.length} flashcards · {examPoints.length} exam points · {mindMap.nodes.length} nodes
+                            {flashcards.length} flashcards · {examPoints.length} exam points · {quiz.length} quiz questions
                         </p>
                     </div>
                     <div style={{ display: 'flex', gap: '0.5rem' }}>
@@ -274,71 +283,14 @@ export default function StudyPage({ params }: { params: Promise<{ id: string }> 
                             position: 'relative',
                         }}
                     >
-                        {activePanel === 'mindmap' && (
-                            <div style={{ height: '100%' }}>
-                                {mindMap.nodes && mindMap.nodes.length > 0 ? (
-                                    <MindMap nodes={mindMap.nodes} edges={mindMap.edges} onNodeClick={handleNodeClick} />
-                                ) : (
-                                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'var(--muted)' }}>
-                                        <div style={{ fontSize: '3rem', marginBottom: '0.75rem' }}>🧠</div>
-                                        <p>No mind map nodes generated yet.</p>
-                                        <button onClick={handleReprocess} style={{ marginTop: '0.75rem', color: 'var(--primary)', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline', fontSize: '0.85rem' }}>Try re-processing →</button>
-                                    </div>
-                                )}
-                            </div>
+                        {activePanel === 'quiz' && (
+                            <Quiz questions={quiz} />
                         )}
-                        {activePanel === 'conceptgraph' && (
-                            <div style={{ height: '100%' }}>
-                                {conceptGraph.nodes && conceptGraph.nodes.length > 0 ? (
-                                    <ConceptGraph nodes={conceptGraph.nodes} edges={conceptGraph.edges} onNodeClick={handleNodeClick} />
-                                ) : (
-                                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'var(--muted)' }}>
-                                        <div style={{ fontSize: '3rem', marginBottom: '0.75rem' }}>🕸️</div>
-                                        <p>No concept graph nodes generated yet.</p>
-                                        <button onClick={handleReprocess} style={{ marginTop: '0.75rem', color: 'var(--primary)', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline', fontSize: '0.85rem' }}>Try re-processing →</button>
-                                    </div>
-                                )}
-                            </div>
+                        {activePanel === 'glossary' && (
+                            <Glossary terms={glossary} />
                         )}
-
-                        {activePanel === 'simulation' && (
-                            <SimulationPlayer materialId={id} />
-                        )}
-
-                        {/* Node Detail Drawer for both Graph types */}
-                        {(activePanel === 'mindmap' || activePanel === 'conceptgraph') && (
-                            <AnimatePresence>
-                                {selectedNode && (
-                                    <motion.div
-                                        initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }}
-                                        transition={{ type: 'spring', damping: 25 }}
-                                        style={{
-                                            position: 'absolute', top: 0, right: 0, bottom: 0, width: '280px',
-                                            background: 'var(--surface)',
-                                            borderLeft: '1px solid var(--border)',
-                                            padding: '1.5rem',
-                                            overflowY: 'auto',
-                                            boxShadow: '-4px 0 16px rgba(0,0,0,0.05)',
-                                            zIndex: 10
-                                        }}
-                                    >
-                                        <button onClick={() => setSelectedNode(null)} style={{ position: 'absolute', top: '1rem', right: '1rem', background: 'none', border: 'none', color: 'var(--muted)', cursor: 'pointer', fontSize: '1.1rem' }}>✕</button>
-                                        <div style={{ fontWeight: 700, fontSize: '1.05rem', color: 'var(--text)', marginBottom: '0.6rem', paddingRight: '1.5rem' }}>{selectedNode.label}</div>
-                                        {selectedNode.description && (
-                                            <p style={{ color: 'var(--muted)', fontSize: '0.82rem', lineHeight: 1.6, marginBottom: '1rem' }}>{selectedNode.description}</p>
-                                        )}
-                                        {selectedNode.node_type === 'relation' && (
-                                            <div style={{ fontSize: '0.7rem', color: '#F59E0B', fontWeight: 600, textTransform: 'uppercase', background: 'var(--pastel-peach)', padding: '2px 8px', borderRadius: '4px', display: 'inline-block' }}>Relationship</div>
-                                        )}
-                                        {selectedNode.video_timestamp_label && (
-                                            <div style={{ background: 'var(--pastel-cream)', border: '1px solid var(--border)', borderRadius: '10px', padding: '0.7rem', marginTop: '1rem' }}>
-                                                <div style={{ color: '#8B6914', fontWeight: 600, fontSize: '0.82rem', marginBottom: '0.2rem' }}>⏱ Video Timestamp</div>
-                                                <div style={{ color: 'var(--text)', fontWeight: 700 }}>{selectedNode.video_timestamp_label}</div>
-                                            </div>
-                                        )}
-                                    </motion.div>
-                                )}
-                            </AnimatePresence>
+                        {activePanel === 'resources' && (
+                            <ExternalResources resources={resources} />
                         )}
 
                         {activePanel === 'flashcards' && (

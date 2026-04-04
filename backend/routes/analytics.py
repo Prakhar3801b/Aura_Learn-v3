@@ -68,8 +68,8 @@ async def record_event(event: SessionEvent):
 
 
 @router.get("/session/{session_id}/summary")
-async def get_session_summary(session_id: str):
-    return analytics_service.get_session_summary(session_id)
+async def get_session_summary(session_id: str, user_id: str = None):
+    return analytics_service.get_session_summary(session_id, user_id)
 
 
 @router.get("/anomalies/{session_id}")

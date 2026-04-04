@@ -184,3 +184,42 @@ async def chat_with_material(material_id: str, request: ChatRequest):
     except Exception as e:
         logger.error(f"Chat failed: {e}")
         raise HTTPException(500, str(e))
+
+
+@router.get("/quiz/{material_id}")
+async def get_quiz(material_id: str):
+    """Generate an active recall quiz for the material."""
+    try:
+        text = await rag_service.get_material_text(material_id)
+        if not text:
+            raise HTTPException(404, "No content found for this material")
+        return await rag_service.ai_service.generate_quiz(text)
+    except Exception as e:
+        logger.error(f"Quiz generation failed: {e}")
+        raise HTTPException(500, str(e))
+
+
+@router.get("/glossary/{material_id}")
+async def get_glossary(material_id: str):
+    """Generate a glossary of key terms for the material."""
+    try:
+        text = await rag_service.get_material_text(material_id)
+        if not text:
+            raise HTTPException(404, "No content found for this material")
+        return await rag_service.ai_service.generate_glossary(text)
+    except Exception as e:
+        logger.error(f"Glossary generation failed: {e}")
+        raise HTTPException(500, str(e))
+
+
+@router.get("/resources/{material_id}")
+async def get_resources(material_id: str):
+    """Suggest external learning resources for the material."""
+    try:
+        text = await rag_service.get_material_text(material_id)
+        if not text:
+            raise HTTPException(404, "No content found for this material")
+        return await rag_service.ai_service.suggest_resources(text)
+    except Exception as e:
+        logger.error(f"Resource suggestion failed: {e}")
+        raise HTTPException(500, str(e))

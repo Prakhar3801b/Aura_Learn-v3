@@ -11,6 +11,7 @@ from services.ocr_service import OCRService
 from services.whisper_service import WhisperService
 from services.ai_service import AIService
 from services.embedding_service import EmbeddingService
+from services.web_service import URLProcessingService
 from models.material import MaterialUploadResponse, ProcessingStatus, FileType
 from datetime import datetime
 from pydantic import BaseModel
@@ -25,6 +26,7 @@ ocr_service = OCRService()
 whisper_service = WhisperService()
 ai_service = AIService()
 embedding_service = EmbeddingService()
+web_service = URLProcessingService()
 
 
 def get_supabase():
@@ -62,17 +64,27 @@ async def process_material_background(
         text = ""
         transcript_segments = None
 
-        if file_type == "pdf":
-            text = pdf_service.extract_text_from_bytes(file_bytes)
-
-        elif file_type == "image":
-            text = ocr_service.extract_from_image_bytes(file_bytes)
-
-        elif file_type == "video":
-            suffix = os.path.splitext(filename)[1] or ".mp4"
-            result = whisper_service.transcribe_bytes(file_bytes, suffix=suffix)
-            text = result["text"]
-            transcript_segments = result["segments"]
+        if file_bytes:
+            if file_type == "pdf":
+                text = pdf_service.extract_text_from_bytes(file_bytes)
+            elif file_type == "image":
+                text = ocr_service.extract_from_image_bytes(file_bytes)
+            elif file_type == "video":
+                suffix = os.path.splitext(filename)[1] or ".mp4"
+                result = whisper_service.transcribe_bytes(file_bytes, suffix=suffix)
+                text = result["text"]
+                transcript_segments = result["segments"]
+        else:
+            # If no bytes, it's a URL-based material and text should already be in DB or fetched here
+            mat = supabase.table("study_materials").select("text").eq("id", material_id).single().execute()
+            text = mat.data.get("text", "")
+            if not text:
+                # Handle cases where URL needs re-scraping
+                url_res = supabase.table("study_materials").select("file_url").eq("id", material_id).single().execute()
+                url = url_res.data.get("file_url")
+                if url:
+                    processed = await web_service.process_url(url)
+                    text = processed["text"]
 
         if not text:
             raise ValueError("Could not extract text from material")
@@ -345,4 +357,60 @@ async def delete_materials_batch(request: BatchDeleteRequest):
     res = supabase.table("study_materials").delete().in_("id", valid_ids).execute()
     
     return {"deleted": len(valid_ids)}
+
+
+class URLUploadRequest(BaseModel):
+    url: str
+    title: Optional[str] = None
+    user_id: str
+
+@router.post("/url", response_model=MaterialUploadResponse)
+async def upload_url(request: URLUploadRequest, background_tasks: BackgroundTasks):
+    """process a URL as study material."""
+    supabase = get_supabase()
+    
+    # 1. Fetch content from URL
+    try:
+        processed = await web_service.process_url(request.url)
+        text = processed["text"]
+        title = request.title or processed["title"]
+        file_type = processed["file_type"]
+    except Exception as e:
+        logger.error(f"Failed to process URL {request.url}: {e}")
+        raise HTTPException(400, f"Could not extract content from URL: {e}")
+
+    material_id = str(uuid.uuid4())
+    
+    # 2. Insert metadata row (storing text directly or in storage)
+    row = {
+        "id": material_id,
+        "user_id": request.user_id,
+        "title": title,
+        "file_type": file_type,
+        "file_url": request.url,
+        "status": ProcessingStatus.pending.value,
+        "created_at": datetime.utcnow().isoformat(),
+        # We'll need a text column in study_materials or store it as a .txt in storage
+    }
+    
+    # Simple fix: store extracted text in study_materials (need migration if it doesn't exist)
+    # Alternatively, upload the extracted text as a .txt file to storage
+    try:
+        text_bytes = text.encode("utf-8")
+        storage_path = f"{request.user_id}/{material_id}/extracted_content.txt"
+        supabase.storage.from_("study-materials").upload(
+            storage_path, text_bytes, {"content-type": "text/plain"}
+        )
+        # Update row with the new storage path if needed, but we used the original URL as file_url
+        supabase.table("study_materials").insert(row).execute()
+        
+        # Kick off background processing (passing text instead of file_bytes)
+        background_tasks.add_task(
+            process_material_background, material_id, None, file_type, "extracted_content.txt"
+        )
+    except Exception as e:
+        logger.error(f"Failed to save URL material: {e}")
+        raise HTTPException(500, f"Database error: {e}")
+
+    return MaterialUploadResponse(**row)
 

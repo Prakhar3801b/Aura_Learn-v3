@@ -2,7 +2,7 @@ import logging
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from config import get_settings
-from routes import materials, ai, analytics, xr
+from routes import materials, ai, analytics, xr, rewards
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -38,6 +38,7 @@ app.include_router(materials.router)
 app.include_router(ai.router)
 app.include_router(analytics.router)
 app.include_router(xr.router)
+app.include_router(rewards.router)
 
 
 @app.get("/", tags=["Health"])

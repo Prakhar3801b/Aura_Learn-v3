@@ -244,6 +244,52 @@ Return ONLY valid JSON:
 }}"""
 
 
+QUIZ_PROMPT = """You are an expert tutor. Create a 5-question multiple-choice quiz based on this study material to test active recall.
+For each question, provide 4 options and the correct answer.
+
+Study Material:
+{text}
+
+Return ONLY valid JSON:
+[
+  {{
+    "question": "...",
+    "options": ["A", "B", "C", "D"],
+    "answer": "...",
+    "explanation": "..."
+  }}
+]"""
+
+GLOSSARY_PROMPT = """Extract the top 10-15 key technical terms and their definitions from this study material.
+
+Study Material:
+{text}
+
+Return ONLY valid JSON:
+[
+  {{
+    "term": "...",
+    "definition": "..."
+  }}
+]"""
+
+RESOURCES_PROMPT = """Based on these study notes, suggest high-quality external learning resources.
+Provide exactly:
+- 3 YouTube video titles and search queries.
+- 2 GeeksforGeeks or W3Schools article titles.
+- 1 ResearchGate or Google Scholar paper topic.
+
+Study Material Summary:
+{text}
+
+Return ONLY valid JSON:
+{{
+  "youtube": [{{ "title": "...", "query": "..." }}],
+  "articles": [{{ "site": "GFG|W3Schools", "title": "...", "url_hint": "..." }}],
+  "academic": [{{ "title": "...", "query": "..." }}]
+}}"""
+
+
 class AIService:
     """LLM orchestration using Groq (Llama 3) to generate study outputs."""
 
@@ -460,6 +506,24 @@ class AIService:
                 logger.error(f"Mastery upsert failed: {e}")
 
         return {"feedback": res, "score": score}
+
+    async def generate_quiz(self, text: str) -> List[Dict]:
+        """Generate an active recall quiz."""
+        prompt = QUIZ_PROMPT.format(text=text[:6000])
+        raw = self._chat(prompt)
+        return self._safe_json_parse(raw)
+
+    async def generate_glossary(self, text: str) -> List[Dict]:
+        """Generate a glossary of key terms."""
+        prompt = GLOSSARY_PROMPT.format(text=text[:6000])
+        raw = self._chat(prompt)
+        return self._safe_json_parse(raw)
+
+    async def suggest_resources(self, text: str) -> Dict[str, Any]:
+        """Suggest external YouTube and web resources."""
+        prompt = RESOURCES_PROMPT.format(text=text[:4000])
+        raw = self._chat(prompt)
+        return self._safe_json_parse(raw)
 
     async def process_material(
         self,

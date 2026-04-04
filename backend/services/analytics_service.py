@@ -2,6 +2,7 @@ import logging
 from datetime import datetime, timedelta
 from typing import List, Optional
 from models.analytics import SessionEvent, AnomalyFlag, StudySession
+from services.reward_service import RewardService
 
 logger = logging.getLogger(__name__)
 
@@ -20,6 +21,7 @@ class AnalyticsService:
     def __init__(self):
         # In-memory store for active session state (in prod, use Redis/Supabase)
         self._session_cache: dict = {}
+        self.reward_service = RewardService()
 
     def record_event(self, event: SessionEvent) -> Optional[AnomalyFlag]:
         """
@@ -83,11 +85,21 @@ class AnalyticsService:
         state = self._session_cache.get(session_id, {})
         return state.get("comprehension_score", 1.0)
 
-    def get_session_summary(self, session_id: str) -> dict:
+    def get_session_summary(self, session_id: str, user_id: str = None) -> dict:
         state = self._session_cache.get(session_id, {})
+        score = state.get("comprehension_score", 1.0)
+        
+        # Trigger reward logic on session end (when summary is fetched)
+        if user_id:
+            try:
+                self.reward_service.update_streak(user_id)
+                self.reward_service.update_understandings(user_id, score)
+            except Exception as e:
+                logger.error(f"Reward update failed: {e}")
+
         return {
             "events_count": len(state.get("events", [])),
-            "comprehension_score": state.get("comprehension_score", 1.0),
+            "comprehension_score": score,
             "stuck_topics": [
                 t for t, c in state.get("topic_pauses", {}).items() if c >= 3
             ],

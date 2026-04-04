@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { chatWithMaterial } from '@/lib/api';
+import { chatWithMaterial, API_BASE } from '@/lib/api';
 
 interface Message {
     role: 'user' | 'assistant';
@@ -22,10 +22,17 @@ export default function Chatbox({ materialId: initialId, materialTitle: initialT
     const [isCollapsed, setIsCollapsed] = useState(false);
     const [activeMaterialId, setActiveMaterialId] = useState<string | undefined>(initialId);
     const [activeMaterialTitle, setActiveMaterialTitle] = useState<string | undefined>(initialTitle);
+    const [suggestedResources, setSuggestedResources] = useState<any>(null);
     const scrollRef = useRef<HTMLDivElement>(null);
 
-    // Initial message and event listeners
     useEffect(() => {
+        if (activeMaterialId) {
+            fetch(`${API_BASE}/ai/resources/${activeMaterialId}`)
+                .then(res => res.json())
+                .then(setSuggestedResources)
+                .catch(() => {});
+        }
+
         if (activeMaterialTitle) {
             setMessages([
                 { role: 'assistant', content: `Hi! I'm Aura, your assistant for **${activeMaterialTitle}**. Ask me anything about this material!` }
@@ -59,7 +66,7 @@ export default function Chatbox({ materialId: initialId, materialTitle: initialT
             window.removeEventListener('aura-chat-init', handleInit);
             window.removeEventListener('aura-toggle-chat', handleToggle);
         };
-    }, [activeMaterialTitle]);
+    }, [activeMaterialTitle, activeMaterialId]);
 
     // Handle updates if initial props change (though in RootLayout they won't)
     useEffect(() => {
@@ -158,6 +165,19 @@ export default function Chatbox({ materialId: initialId, materialTitle: initialT
 
                 {/* Messages */}
                 <div ref={scrollRef} className="chat-messages" style={{ flex: 1, overflowY: 'auto', padding: '1rem' }}>
+                    {suggestedResources && (
+                        <div style={{ marginBottom: '1.5rem', background: 'var(--input-bg)', padding: '1rem', borderRadius: '12px', border: '1px solid var(--border)' }}>
+                            <div style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--primary)', marginBottom: '0.6rem', textTransform: 'uppercase' }}>📡 Suggested Resources</div>
+                            <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                                {suggestedResources.youtube?.slice(0, 2).map((r: any, i: number) => (
+                                    <a key={i} href={`https://www.youtube.com/results?search_query=${encodeURIComponent(r.query)}`} target="_blank" style={{ fontSize: '0.7rem', background: 'var(--surface)', padding: '4px 8px', borderRadius: '6px', border: '1px solid var(--border)', textDecoration: 'none', color: 'var(--text)' }}>🎬 {r.title}</a>
+                                ))}
+                                {suggestedResources.articles?.slice(0, 1).map((r: any, i: number) => (
+                                    <a key={i} href={`https://www.google.com/search?q=${encodeURIComponent(r.title)}`} target="_blank" style={{ fontSize: '0.7rem', background: 'var(--surface)', padding: '4px 8px', borderRadius: '6px', border: '1px solid var(--border)', textDecoration: 'none', color: 'var(--text)' }}>📖 {r.title}</a>
+                                ))}
+                            </div>
+                        </div>
+                    )}
                     {messages.map((msg, i) => (
                         <motion.div
                             key={i}

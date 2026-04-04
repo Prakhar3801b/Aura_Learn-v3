@@ -38,7 +38,6 @@ export default function StudyPage({ params }: { params: Promise<{ id: string }> 
     const [glossary, setGlossary] = useState<any[]>([]);
     const [resources, setResources] = useState<any>(null);
     const [activePanel, setActivePanel] = useState<Panel>('flashcards');
-    const [selectedNode, setSelectedNode] = useState<any>(null);
     const [sessionId, setSessionId] = useState<string>('');
     const [loading, setLoading] = useState(true);
     const [status, setStatus] = useState<string>('pending');
@@ -134,12 +133,6 @@ export default function StudyPage({ params }: { params: Promise<{ id: string }> 
         };
     }, [id]);
 
-    const handleNodeClick = (node: any) => {
-        setSelectedNode(node);
-        if (sessionId) {
-            recordEvent({ session_id: sessionId, material_id: id, event_type: 'node_click', topic: node.label });
-        }
-    };
 
     const handleConfidenceUpdate = async (flashcardId: string, score: number) => {
         await updateFlashcardConfidence(flashcardId, score);
@@ -276,9 +269,9 @@ export default function StudyPage({ params }: { params: Promise<{ id: string }> 
                         transition={{ duration: 0.2 }}
                         className="card"
                         style={{
-                            height: (activePanel === 'mindmap' || activePanel === 'conceptgraph') ? '65vh' : 'auto',
+                            height: 'auto',
                             minHeight: '400px',
-                            padding: (activePanel === 'mindmap' || activePanel === 'conceptgraph') ? '0' : '1.5rem',
+                            padding: '1.5rem',
                             overflow: 'hidden',
                             position: 'relative',
                         }}

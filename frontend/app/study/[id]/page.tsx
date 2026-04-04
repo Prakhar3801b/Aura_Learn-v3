@@ -5,11 +5,12 @@ import { motion, AnimatePresence } from 'framer-motion';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import ExamPoints from '@/components/ExamPoints';
+import ExamPointsComponent from '@/components/ExamPoints';
 import SimulationPlayer from '@/components/SimulationPlayer';
-import Quiz from '@/components/Quiz';
-import Glossary from '@/components/Glossary';
+import QuizComponent from '@/components/Quiz';
+import GlossaryComponent from '@/components/Glossary';
 import ExternalResources from '@/components/ExternalResources';
+import FlashcardsComponent from '@/components/Flashcards';
 import { 
     getFlashcards, 
     getExamPoints, 
@@ -23,7 +24,6 @@ import {
 } from '@/lib/api';
 import { supabase } from '@/lib/supabase';
 import { AuraButton } from '@/components/AuraButton';
-
 import PracticalWorkshop from '@/components/PracticalWorkshop';
 
 type Panel = 'quiz' | 'glossary' | 'flashcards' | 'exampoints' | 'practical' | 'simulation' | 'resources';
@@ -277,20 +277,20 @@ export default function StudyPage({ params }: { params: Promise<{ id: string }> 
                         }}
                     >
                         {activePanel === 'quiz' && (
-                            <Quiz questions={quiz} />
+                            <QuizComponent questions={quiz} />
                         )}
                         {activePanel === 'glossary' && (
-                            <Glossary terms={glossary} />
+                            <GlossaryComponent terms={glossary} />
                         )}
                         {activePanel === 'resources' && (
                             <ExternalResources resources={resources} />
                         )}
 
                         {activePanel === 'flashcards' && (
-                            <Flashcards flashcards={flashcards} onConfidenceUpdate={handleConfidenceUpdate} />
+                            <FlashcardsComponent flashcards={flashcards} onConfidenceUpdate={handleConfidenceUpdate} />
                         )}
                         {activePanel === 'exampoints' && (
-                            <ExamPoints examPoints={examPoints} />
+                            <ExamPointsComponent examPoints={examPoints} />
                         )}
                         {activePanel === 'practical' && (
                             <PracticalWorkshop materialId={id} />

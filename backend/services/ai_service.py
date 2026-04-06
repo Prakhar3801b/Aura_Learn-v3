@@ -12,6 +12,8 @@ settings = get_settings()
 
 FLASHCARD_PROMPT = """You are an expert study assistant. Given the following study material text, generate exactly {count} high-quality predictive flashcards that target the most likely exam questions.
 
+**CRITICAL**: Ignore all navigational links, footer content, social media references (e.g., "Follow us on YouTube"), and other non-educational noise in the input text. Focus ONLY on the core educational content.
+
 Study Material:
 {text}
 
@@ -27,6 +29,8 @@ Return ONLY a valid JSON array with this exact structure, no other text:
 
 EXAM_POINTS_PROMPT = """You are an expert exam coach. Given this study material, extract the {count} most critical exam points — facts, definitions, formulas, or concepts most likely to appear in exams.
 
+**CRITICAL**: Ignore all navigational links, footer content, social media references, and other non-educational noise. Focus ONLY on core academic facts.
+
 Study Material:
 {text}
 
@@ -40,6 +44,8 @@ Return ONLY a valid JSON array:
 ]"""
 
 MINDMAP_PROMPT = """You are an expert knowledge graph builder. Analyze this study material and build a hierarchical mind map.
+
+**CRITICAL**: Ignore all navigational links, footer content, social media references, and other non-educational noise. Focus ONLY on the structure of the educational content.
 
 Study Material:
 {text}

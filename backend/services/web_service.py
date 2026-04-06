@@ -63,16 +63,52 @@ class URLProcessingService:
             raise
 
     async def _process_generic_web(self, url: str) -> Dict[str, Any]:
-        """Extract text from a generic webpage."""
+        """Extract text from a generic webpage with noise reduction."""
         logger.info(f"Processing Generic Web URL: {url}")
         try:
+            # Use WebBaseLoader to get the document
             loader = WebBaseLoader(url)
             docs = loader.load()
-            text = " ".join([d.page_content for d in docs])
+            
+            if not docs:
+                raise ValueError("No content could be loaded from this URL")
+
+            from bs4 import BeautifulSoup
+            
+            # WebBaseLoader might have already done some text extraction, 
+            # but we want to redo it if we can to be cleaner.
+            # However, WebBaseLoader docs often contain the raw HTML if configured, 
+            # but by default it uses BeautifulSoup internally.
+            
+            # Let's refine the text from the loader's output if it's too noisy
+            # or use httpx to get raw HTML and clean it ourselves.
+            
+            async with httpx.AsyncClient(timeout=20.0) as client:
+                response = await client.get(url, follow_redirects=True)
+                html = response.text
+                
+            soup = BeautifulSoup(html, "html.parser")
+            
+            # 1. Remove noisy elements
+            for element in soup(["script", "style", "nav", "footer", "header", "aside", "form"]):
+                element.decompose()
+            
+            # 2. Extract text from main content areas if they exist, otherwise fallback to body
+            main_content = soup.find("main") or soup.find("article") or soup.find("div", {"id": "content"}) or soup.find("body")
+            
+            if main_content:
+                text = main_content.get_text(separator="\n", strip=True)
+            else:
+                text = soup.get_text(separator="\n", strip=True)
+                
+            # 3. Final cleanup: remove excessive newlines
+            text = re.sub(r'\n{3,}', '\n\n', text)
             
             # Simple title extraction
             title = "Web Article"
-            if docs and "title" in docs[0].metadata:
+            if soup.title:
+                title = soup.title.string
+            elif docs and "title" in docs[0].metadata:
                 title = docs[0].metadata["title"]
             
             return {

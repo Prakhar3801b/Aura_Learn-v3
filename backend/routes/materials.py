@@ -256,10 +256,18 @@ async def upload_material(
         logger.error(f"Supabase storage upload failed: {e}")
         raise HTTPException(500, f"Failed to upload file to storage: {e}")
 
+    # Resolve user_id: The incoming user_id is the Supabase Auth ID.
+    # We need the internal public.users.id for foreign key consistency.
+    try:
+        user_res = supabase.table("users").select("id").eq("auth_user_id", user_id).single().execute()
+        internal_user_id = user_res.data["id"] if user_res.data else user_id
+    except Exception:
+        internal_user_id = user_id
+
     # Insert metadata row
     row = {
         "id": material_id,
-        "user_id": user_id,
+        "user_id": internal_user_id,
         "title": title,
         "file_type": file_type.value,
         "file_url": file_url,
@@ -292,10 +300,18 @@ async def get_material(material_id: str):
 @router.get("/user/{user_id}")
 async def list_user_materials(user_id: str):
     supabase = get_supabase()
+    
+    # Resolve user_id from auth_user_id if necessary
+    try:
+        user_res = supabase.table("users").select("id").eq("auth_user_id", user_id).single().execute()
+        internal_user_id = user_res.data["id"] if user_res.data else user_id
+    except Exception:
+        internal_user_id = user_id
+
     result = (
         supabase.table("study_materials")
         .select("id, title, file_type, status, created_at")
-        .eq("user_id", user_id)
+        .eq("user_id", internal_user_id)
         .order("created_at", desc=True)
         .execute()
     )
@@ -390,16 +406,22 @@ async def upload_url(request: URLUploadRequest, background_tasks: BackgroundTask
 
     material_id = str(uuid.uuid4())
     
-    # 2. Insert metadata row (storing text directly or in storage)
+    # Resolve user_id from auth_user_id
+    try:
+        user_res = supabase.table("users").select("id").eq("auth_user_id", request.user_id).single().execute()
+        internal_user_id = user_res.data["id"] if user_res.data else request.user_id
+    except Exception:
+        internal_user_id = request.user_id
+
+    # 2. Insert metadata row
     row = {
         "id": material_id,
-        "user_id": request.user_id,
+        "user_id": internal_user_id,
         "title": title,
         "file_type": file_type,
         "file_url": request.url,
         "status": ProcessingStatus.pending.value,
         "created_at": datetime.utcnow().isoformat(),
-        # We'll need a text column in study_materials or store it as a .txt in storage
     }
     
     # Simple fix: store extracted text in study_materials (need migration if it doesn't exist)

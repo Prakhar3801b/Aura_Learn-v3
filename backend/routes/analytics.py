@@ -32,6 +32,15 @@ async def start_session(user_id: str, material_id: str):
         "comprehension_score": 1.0,
     }
     supabase.table("study_sessions").insert(row).execute()
+
+    # Update daily streak on start to provide immediate visual feedback
+    try:
+        from services.reward_service import RewardService
+        reward_service = RewardService()
+        reward_service.update_streak(user_id)
+    except Exception as e:
+        logger.error(f"Failed to update streak at start of session: {e}")
+
     return {"session_id": session_id}
 
 
@@ -46,6 +55,17 @@ async def record_event(event: SessionEvent):
     supabase.table("study_sessions").update(
         {"comprehension_score": score}
     ).eq("id", event.session_id).execute()
+
+    # Update daily streak
+    try:
+        session_res = supabase.table("study_sessions").select("user_id").eq("id", event.session_id).single().execute()
+        if session_res.data:
+            user_id = session_res.data["user_id"]
+            from services.reward_service import RewardService
+            reward_service = RewardService()
+            reward_service.update_streak(user_id)
+    except Exception as e:
+        logger.error(f"Failed to update streak in record_event: {e}")
 
     # Persist anomaly if detected
     if anomaly:

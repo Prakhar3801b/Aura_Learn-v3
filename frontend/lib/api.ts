@@ -174,6 +174,11 @@ export async function getAnomalies(sessionId: string) {
     return fetchAPI<any[]>(`/analytics/anomalies/${sessionId}`);
 }
 
+export async function getSessionSummary(sessionId: string, userId?: string) {
+    const q = userId ? `?user_id=${userId}` : '';
+    return fetchAPI<any>(`/analytics/session/${sessionId}/summary${q}`);
+}
+
 // ── XR Labs ───────────────────────────────────
 
 export async function getARLabs(category?: string) {

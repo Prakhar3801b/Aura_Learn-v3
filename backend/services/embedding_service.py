@@ -1,36 +1,30 @@
-import voyageai
 import logging
 from typing import List
-from config import get_settings
+from sentence_transformers import SentenceTransformer
 
 logger = logging.getLogger(__name__)
-settings = get_settings()
 
 class EmbeddingService:
-    """Service to generate vector embeddings using Voyage AI."""
+    """Service to generate vector embeddings using local sentence-transformers."""
 
     def __init__(self):
-        self.client = voyageai.Client(api_key=settings.voyage_api_key)
-        self.model = "voyage-3"
+        logger.info("Initializing local SentenceTransformer model (all-MiniLM-L6-v2)...")
+        self.model = SentenceTransformer('all-MiniLM-L6-v2')
+        logger.info("SentenceTransformer initialized successfully.")
 
     def embed_texts(self, texts: List[str], input_type: str = "document") -> List[List[float]]:
         """
         Generate embeddings for a list of texts.
-        input_type: "document" for storage, "query" for search.
         """
         try:
             if not texts:
                 return []
             
-            # Voyage 3 handles batching, but we should be mindful of limits
-            result = self.client.embed(
-                texts, 
-                model=self.model, 
-                input_type=input_type
-            )
-            return result.embeddings
+            # encode() returns a numpy array by default; tolist() converts it to python floats
+            embeddings = self.model.encode(texts).tolist()
+            return embeddings
         except Exception as e:
-            logger.error(f"Voyage AI embedding failed: {e}")
+            logger.error(f"Local embedding failed: {e}")
             raise
 
     def embed_query(self, query: str) -> List[float]:

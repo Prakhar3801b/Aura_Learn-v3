@@ -11,8 +11,8 @@ class Settings(BaseSettings):
     # Groq
     groq_api_key: str = ""
 
-    # Voyage AI (for embeddings)
-    voyage_api_key: str = ""
+    # Hugging Face (for embeddings)
+    hf_api_key: str = ""
 
     # App
     secret_key: str = "change-this-in-production-supersecretkey"
@@ -28,6 +28,7 @@ class Settings(BaseSettings):
     class Config:
         env_file = ".env"
         case_sensitive = False
+        extra = "ignore"
 
 
 @lru_cache()

@@ -301,10 +301,11 @@ class AIService:
 
     def __init__(self):
         self.client = Groq(api_key=settings.groq_api_key)
-        self.model = "llama-3.3-70b-versatile"
+        self.model = settings.groq_model or "llama-3.3-70b-versatile"
+        self.fallback_model = settings.groq_fallback_model or "llama-3.1-8b-instant"
 
     def _chat(self, prompt: str, max_tokens: int = 4096) -> str:
-        """Call Groq chat completion."""
+        """Call Groq chat completion with automatic rate-limit fallback."""
         try:
             response = self.client.chat.completions.create(
                 model=self.model,
@@ -314,6 +315,26 @@ class AIService:
             )
             return response.choices[0].message.content.strip()
         except Exception as e:
+            # Check for Rate Limit (HTTP 429 or rate_limit message)
+            is_429 = False
+            if hasattr(e, "status_code") and e.status_code == 429:
+                is_429 = True
+            elif "rate_limit" in str(e).lower() or "429" in str(e):
+                is_429 = True
+
+            if is_429 and self.model != self.fallback_model:
+                logger.warning(f"Groq rate limit reached for {self.model}. Retrying with fallback model {self.fallback_model}...")
+                try:
+                    response = self.client.chat.completions.create(
+                        model=self.fallback_model,
+                        messages=[{"role": "user", "content": prompt}],
+                        max_tokens=max_tokens,
+                        temperature=0.3,
+                    )
+                    return response.choices[0].message.content.strip()
+                except Exception as fallback_err:
+                    logger.error(f"Fallback model {self.fallback_model} also failed: {fallback_err}")
+            
             logger.error(f"Groq API call failed: {e}")
             raise
 

@@ -19,34 +19,44 @@ class EmbeddingService:
 
     def embed_texts(self, texts: List[str], input_type: str = "document") -> List[List[float]]:
         """
-        Generate embeddings for a list of texts.
+        Generate embeddings for a list of texts, with retries for transient DNS/network errors.
         """
         if not texts:
             return []
 
-        try:
-            response = httpx.post(
-                self.api_url,
-                headers=self.headers,
-                json={"inputs": texts, "options": {"wait_for_model": True}},
-                timeout=30.0
-            )
-            response.raise_for_status()
-            result = response.json()
-            
-            # The API returns a list of floats (for a single string input) or list of lists.
-            # When texts is a list, it usually returns a list of lists.
-            # Let's ensure it is always List[List[float]]
-            if isinstance(result, list):
-                if len(result) > 0 and not isinstance(result[0], list):
-                    return [result]
-                return result
-            else:
-                raise ValueError(f"Unexpected response format from HF API: {result}")
+        import time
+        max_retries = 4
+        base_delay = 1.5
+
+        for attempt in range(max_retries):
+            try:
+                response = httpx.post(
+                    self.api_url,
+                    headers=self.headers,
+                    json={"inputs": texts, "options": {"wait_for_model": True}},
+                    timeout=30.0
+                )
+                response.raise_for_status()
+                result = response.json()
                 
-        except Exception as e:
-            logger.error(f"Hugging Face embedding API failed: {e}")
-            raise
+                # The API returns a list of floats (for a single string input) or list of lists.
+                # When texts is a list, it usually returns a list of lists.
+                # Let's ensure it is always List[List[float]]
+                if isinstance(result, list):
+                    if len(result) > 0 and not isinstance(result[0], list):
+                        return [result]
+                    return result
+                else:
+                    raise ValueError(f"Unexpected response format from HF API: {result}")
+            except (httpx.ConnectError, httpx.ConnectTimeout, httpx.HTTPStatusError) as e:
+                logger.warning(f"Hugging Face embedding API attempt {attempt + 1} failed: {e}")
+                if attempt == max_retries - 1:
+                    logger.error(f"Hugging Face embedding API failed after {max_retries} attempts: {e}")
+                    raise
+                # Exponential backoff
+                time.sleep(base_delay * (2 ** attempt))
+        
+        raise RuntimeError("Hugging Face embedding API failed unexpectedly without throwing inside retry loop.")
 
     def embed_query(self, query: str) -> List[float]:
         """Convenience method for embedding a single query."""

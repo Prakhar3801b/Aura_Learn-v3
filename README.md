@@ -1,7 +1,7 @@
 # Aura Learn V3 🎓✨
 
 > **The unified AI study engine** — upload any study material, get targeted exam points, predictive flashcards, interactive mind maps, and WebXR AR labs. Backed by real-time comprehension analytics.
-> aura-learn-v3.vercel.app
+> https://aura-learn-v3.vercel.app
 
 ## Stack
 
